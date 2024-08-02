@@ -67,7 +67,6 @@ def main():
 
     if config.notify_for == 'status_change_to_qatesting':
         notify_change_status()
-
     else:
         raise Exception('Unsupported value for argument \'notify_for\'')
 
