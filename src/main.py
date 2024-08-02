@@ -144,11 +144,5 @@ def main():
     if config.dry_run:
         logger.info('DRY RUN MODE ON!')
 
-    if config.notify_for == 'expiring_issues':
-        notify_expiring_issues()
-    else:
-        raise Exception('Unsupported value for argument \'notify_for\'')
-
-
 if __name__ == "__main__":
     main()
