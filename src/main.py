@@ -5,11 +5,21 @@ import graphql
 import json
 import os
 
-PREVIOUS_STATUSES_FILE = 'previous_statuses.json'
+def load_previous_statuses(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            return json.load(file)
+    return {}
+
+def save_previous_statuses(file_path, data):
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+
+previous_statuses_file = 'previous_statuses.json'
 
 def notify_change_status():
     # Load previous statuses from the file
-    previous_statuses = load_previous_statuses(PREVIOUS_STATUSES_FILE)
+    previous_statuses = load_previous_statuses(previous_statuses_file)
     
     issues = graphql.get_project_issues(
         owner=config.repository_owner,
