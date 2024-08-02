@@ -154,12 +154,12 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
             issue_id = node['content']['id']
             current_status = node.get('fieldValueByName', {}).get('name')
 
-            # if previous
-            
-            # Check if the status matches "QA Testing"
-            field_value = node.get('fieldValueByName', {})
-            if field_Value.get('name') == 'QA Testing':
+            # Check if status has changed to "QA Testing"
+            if previous_statuses.get(issue_id) and previous_statuses[issue_id] != 'QA Testing' and current_status == 'QA Testing':
                 filtered_issues.append(node)
+
+            # Update previous status
+            previous_statuses[issue_id] = current_status
               
         nodes = filtered_issues
 
@@ -173,7 +173,8 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
             after=pageinfo.get('endCursor'),
             filters=filters,
             issues=issues,
-            status_field_name=status_field_name
+            status_field_name=status_field_name,
+            previous_statuses=previous_statuses
         )
 
     return issues
