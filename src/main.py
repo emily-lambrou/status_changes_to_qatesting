@@ -7,13 +7,20 @@ import os
 
 def load_previous_statuses(file_path):
     if os.path.exists(file_path):
-        with open(file_path, 'r') as file:
-            return json.load(file)
+        try:
+            with open(file_path, 'r') as file:
+                return json.load(file)
+        except (IOError, json.JSONDecodeError) as e:
+            logger.error(f'Error loading previous statuses: {e}')
+            return {}
     return {}
 
 def save_previous_statuses(file_path, data):
-    with open(file_path, 'w') as file:
-        json.dump(data, file, indent=4)
+    try:
+        with open(file_path, 'w') as file:
+            json.dump(data, file, indent=4)
+    except IOError as e:
+        logger.error(f'Error saving previous statuses: {e}')
 
 previous_statuses_file = 'previous_statuses.json'
 
