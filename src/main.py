@@ -23,38 +23,43 @@ def notify_change_status():
         #     continue
         issue = projectItem['content']
 
-        # Get the list of assignees
-        assignees = issue['assignees']['nodes']
+        # fieldValueByName provides the status and converting it to a variable
+        status = projectItem['fieldValuebyName']['status']
 
-        if config.notification_type == 'comment':
-            # Prepare the notification content
-            comment = utils.prepare_issue_comment(
-                issue=issue,
-                assignees=assignees,
-            )
-
-            if not config.dry_run:
-                # Add the comment to the issue
-                graphql.add_issue_comment(issue['id'], comment)
-
-            logger.info(f'Comment added to issue #{issue["number"]} ({issue["id"]})')
-        elif config.notification_type == 'email':
-            # Prepare the email content
-            subject, message, to = utils.prepare_issue_email_message(
-                issue=issue,
-                assignees=assignees
-            )
-
-            if not config.dry_run:
-                # Send the email
-                utils.send_email(
-                    from_email=config.smtp_from_email,
-                    to_email=to,
-                    subject=subject,
-                    html_body=message
+        # Check if the status matches "QA Testing"
+        if status == 'QA Testing':
+            # Get the list of assignees
+            assignees = issue['assignees']['nodes']
+            
+    
+            if config.notification_type == 'comment':
+                # Prepare the notification content
+                comment = utils.prepare_issue_comment(
+                    issue=issue,
+                    assignees=assignees,
                 )
-            logger.info(f'Email sent to {to} for issue #{issue["number"]}')
 
+                if not config.dry_run:
+                    # Add the comment to the issue
+                    graphql.add_issue_comment(issue['id'], comment)
+
+                logger.info(f'Comment added to issue #{issue["number"]} ({issue["id"]})')
+            elif config.notification_type == 'email':
+                # Prepare the email content
+                subject, message, to = utils.prepare_issue_email_message(
+                    issue=issue,
+                    assignees=assignees
+                )
+
+                if not config.dry_run:
+                    # Send the email
+                    utils.send_email(
+                        from_email=config.smtp_from_email,
+                        to_email=to,
+                        subject=subject,
+                        html_body=message
+                    )
+                logger.info(f'Email sent to {to} for issue #{issue["number"]}')
 
 def main():
     logger.info('Process started...')
@@ -62,7 +67,7 @@ def main():
         logger.info('DRY RUN MODE ON!')
 
     if config.notify_for == 'status_change_to_qatesting':
-        notify_changes_status()
+        notify_change_status()
 
     else:
         raise Exception('Unsupported value for argument \'notify_for\'')
