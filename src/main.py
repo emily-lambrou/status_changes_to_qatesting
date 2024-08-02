@@ -18,13 +18,13 @@ def notify_change_status():
 
     # Check if there are issues available
     if not issues:
-        logger.info('No issues has been found')
+        logger.info('No issues have been found')
         return
 
     for issue in issues:
         # Extract necessary information
         issue_id = issue['content']['id']
-        status = issue['content']['assignees']['nodes']
+        status = issue.get('fieldValueByName', {}).get('status')
 
         # Handle the status change logic
         if previous_statuses.get(issue_id) != 'QA Testing' and status == 'QA Testing':
@@ -37,9 +37,9 @@ def notify_change_status():
                 )
 
                 if not config.dry_run:
-                    graphql.add_issue_comment(issue['content']['id'], comment)
+                    graphql.add_issue_comment(issue_id, comment)
                 
-                logger.info(f'Comment added to issue #{issue["content"]["number"]} ({issue["content"]["id"]})')
+                logger.info(f'Comment added to issue #{issue["content"]["number"]} ({issue_id})')
 
             elif config.notification_type == 'email':
                 subject, message, to = utils.prepare_issue_email_message(
@@ -47,7 +47,7 @@ def notify_change_status():
                     assignees=assignees
                 )
 
-                 if not config.dry_run:
+                if not config.dry_run:
                     utils.send_email(
                         from_email=config.smtp_from_email,
                         to_email=to,
