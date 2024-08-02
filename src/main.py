@@ -55,14 +55,18 @@ def notify_change_status():
                 )
             logger.info(f'Email sent to {to} for issue #{issue["number"]}')
 
+def notify_missing_status():
+
 
 def main():
     logger.info('Process started...')
     if config.dry_run:
         logger.info('DRY RUN MODE ON!')
 
-    if config.notify_for == 'expiring_issues':
+    if config.notify_for == 'status_change_to_qatesting':
         notify_changes_status()
+    elseif config.notify_for == 'missing_status':
+        notify_missing_status()
     else:
         raise Exception('Unsupported value for argument \'notify_for\'')
 
