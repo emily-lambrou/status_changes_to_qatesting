@@ -1,4 +1,4 @@
-name: "QA Testing Status Notifier"
+name: "QA Testing Status Notification"
 description: "Notify when an issue's status changes to QA Testing by commenting on the issue and sending an email to the assignees."
 author: "Emily Lambrou"
 branding:
