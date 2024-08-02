@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from logger import logger
 import config
 import utils
@@ -28,8 +27,6 @@ def notify_changes_status():
         logger.info('No issues has been found')
         return
 
-    # Get the date for tomorrow
-    tomorrow = datetime.now().date() + timedelta(days=1)
 
     # Loop through issues
     for issue in issues:
@@ -39,7 +36,7 @@ def notify_changes_status():
         else:
             projectNodes = issue['projectItems']['nodes']
 
-            # If no project is assigned to the
+            # If no project is assigned to the issue
             if not projectNodes:
                 continue
 
@@ -47,41 +44,34 @@ def notify_changes_status():
             projectItem = next((entry for entry in projectNodes if entry['project']['number'] == config.project_number),
                                None)
 
-        # The fieldValueByName contains the date for the DueDate Field
+        # The fieldValueByName contains the status for the Status Field
         if not projectItem['fieldValueByName']:
             continue
 
         # Get the status value and convert it to date object
-        duedate = projectItem["fieldValueByName"]["date"]
-        duedate_obj = datetime.strptime(duedate, "%Y-%m-%d").date()
-
-        # Check if the project item is due soon or not
-        if duedate_obj != tomorrow:
-            continue
-
+        status = projectItem["fieldValueByName"]["status"]
+    
         # Get the list of assignees
         assignees = issue['assignees']['nodes']
 
         # Handle notification type
         if config.notification_type == 'comment':
             # Prepare the notification content
-            comment = utils.prepare_expiring_issue_comment(
+            comment = utils.prepare_issue_comment(
                 issue=issue,
-                assignees=assignees,
-                duedate=tomorrow
+                assignees=assignees
             )
 
             if not config.dry_run:
                 # Add the comment to the issue
                 graphql.add_issue_comment(issue['id'], comment)
 
-            logger.info(f'Comment added to issue #{issue["number"]} ({issue["id"]}) with due date on {tomorrow}')
+            logger.info(f'Comment added to issue #{issue["number"]} ({issue["id"]}) with status changes to QA Testing')
         elif config.notification_type == 'email':
             # Prepare the email content
-            subject, message, to = utils.prepare_expiring_issue_email_message(
+            subject, message, to = utils.prepare_issue_email_message(
                 issue=issue,
-                assignees=assignees,
-                duedate=tomorrow
+                assignees=assignees
             )
 
             if not config.dry_run:
@@ -93,7 +83,7 @@ def notify_changes_status():
                     html_body=message
                 )
 
-            logger.info(f'Email sent to {to} for issue #{issue["number"]} with due date on {tomorrow}')
+            logger.info(f'Email sent to {to} for issue #{issue["number"]} with status changes to QA Testing')
 
 
 def notify_missing_duedate():
@@ -101,7 +91,7 @@ def notify_missing_duedate():
         owner=config.repository_owner,
         owner_type=config.repository_owner_type,
         project_number=config.project_number,
-        duedate_field_name=config.duedate_field_name,
+        status_field_name=config.status_field_name,
         filters={'empty_duedate': True, 'open_only': True}
     )
 
@@ -111,7 +101,8 @@ def notify_missing_duedate():
         return
 
     for projectItem in issues:
-        # if projectItem['id'] != 'MDEzOlByb2plY3RWMkl0ZW0xMzMxOA==':
+        # node_id for status: MDEzOlByb2plY3RDb2x1bW4zNjk=
+        # if projectItem['id'] != 'MDEzOlByb2plY3RDb2x1bW4zNjk=':
         #     continue
         issue = projectItem['content']
 
@@ -120,7 +111,7 @@ def notify_missing_duedate():
 
         if config.notification_type == 'comment':
             # Prepare the notification content
-            comment = utils.prepare_missing_duedate_comment(
+            comment = utils.prepare_issue_comment(
                 issue=issue,
                 assignees=assignees,
             )
@@ -132,7 +123,7 @@ def notify_missing_duedate():
             logger.info(f'Comment added to issue #{issue["number"]} ({issue["id"]})')
         elif config.notification_type == 'email':
             # Prepare the email content
-            subject, message, to = utils.prepare_missing_duedate_email_message(
+            subject, message, to = utils.prepare_issue_email_message(
                 issue=issue,
                 assignees=assignees
             )
@@ -155,8 +146,6 @@ def main():
 
     if config.notify_for == 'expiring_issues':
         notify_expiring_issues()
-    elif config.notify_for == 'missing_duedate':
-        notify_missing_duedate()
     else:
         raise Exception('Unsupported value for argument \'notify_for\'')
 
