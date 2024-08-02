@@ -15,7 +15,7 @@ inputs:
     description: "The Project Number"
     required: true
   notify_for:
-    description: "The type of the notification are about to sent (status_change_to_qatesting, missing_status) "
+    description: "The type of the notification are about to sent (status_change_to_qatesting)"
     required: true
     default: "status_change_to_qatesting"  
   status_field_name:
