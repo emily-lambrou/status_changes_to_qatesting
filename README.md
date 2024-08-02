@@ -1,85 +1,43 @@
-# Python Container Action Template
+# Status changes to "QA Testing" Notifications
 
-[![Action Template](https://img.shields.io/badge/Action%20Template-Python%20Container%20Action-blue.svg?colorA=24292e&colorB=0366d6&style=flat&longCache=true&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAM6wAADOsB5dZE0gAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAERSURBVCiRhZG/SsMxFEZPfsVJ61jbxaF0cRQRcRJ9hlYn30IHN/+9iquDCOIsblIrOjqKgy5aKoJQj4O3EEtbPwhJbr6Te28CmdSKeqzeqr0YbfVIrTBKakvtOl5dtTkK+v4HfA9PEyBFCY9AGVgCBLaBp1jPAyfAJ/AAdIEG0dNAiyP7+K1qIfMdonZic6+WJoBJvQlvuwDqcXadUuqPA1NKAlexbRTAIMvMOCjTbMwl1LtI/6KWJ5Q6rT6Ht1MA58AX8Apcqqt5r2qhrgAXQC3CZ6i1+KMd9TRu3MvA3aH/fFPnBodb6oe6HM8+lYHrGdRXW8M9bMZtPXUji69lmf5Cmamq7quNLFZXD9Rq7v0Bpc1o/tp0fisAAAAASUVORK5CYII=)](https://github.com/jacobtomlinson/python-container-action)
-[![Actions Status](https://github.com/jacobtomlinson/python-container-action/workflows/Lint/badge.svg)](https://github.com/jacobtomlinson/python-container-action/actions)
-[![Actions Status](https://github.com/jacobtomlinson/python-container-action/workflows/Integration%20Test/badge.svg)](https://github.com/jacobtomlinson/python-container-action/actions)
+GitHub doesn't provide a built-in way to send notifications if the status is changing. This
+GitHub Action aims to address this by allowing you to manage the changes within a central GitHub project.
 
-This is a template for creating GitHub actions and contains a small Python application which will be built into a minimal [Container Action](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-a-docker-container-action). Our final container from this template is ~50MB, yours may be a little bigger once you add some code. If you want something smaller check out my [go-container-action template](https://github.com/jacobtomlinson/go-container-action/actions).
+## Introduction
 
-In `main.py` you will find a small example of accessing Action inputs and returning Action outputs. For more information on communicating with the workflow see the [development tools for GitHub Actions](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/development-tools-for-github-actions).
+This GitHub Action allows you to manage status changes for issues in a central GitHub project. It integrates with a custom
+text field (status) that you can add to your GitHub project board. 
 
-> 🏁 To get started, click the `Use this template` button on this repository [which will create a new repository based on this template](https://github.blog/2019-06-06-generate-new-repositories-with-repository-templates/).
+There are two ways to send notifications:
+1. With comments: Everyone which is subscribed to the issue will receive email notification when comment is placed.
+2. With emails: Assignees will receive email directly from the action. 
 
-## Usage
+### Prerequisites
 
-Describe how to use your action here.
+Before you can start using this GitHub Action, you'll need to ensure you have the following:
 
-### Example workflow
-
-```yaml
-name: My Workflow
-on: [push, pull_request]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - name: Run action
-
-      # Put your action repo here
-      uses: me/myaction@master
-
-      # Put an example of your mandatory inputs here
-      with:
-        myInput: world
-```
+1. A GitHub repository where you want to enable this action.
+2. A GitHub project board with a custom status field added.
+3. A Token (Classic) with permissions to repo:*, read:user, user:email, read:project
 
 ### Inputs
 
-| Input                                             | Description                                        |
-|------------------------------------------------------|-----------------------------------------------|
-| `myInput`  | An example mandatory input    |
-| `anotherInput` _(optional)_  | An example optional input    |
+| Input                                | Description                                                                                      |
+|--------------------------------------|--------------------------------------------------------------------------------------------------|
+| `gh_token`                           | The GitHub Token                                                                                 |
+| `project_number`                     | The project number                                                                               |
+| `notify_for`                         | The type of the notification (expiring_issues or missing_duedate) are about to sent. Default is `expiring_issues` |
+| `duedate_field_name` _(optional)_    | THe duedate field name. The default is `Due Date`                                                |
+| `notification_type` _(optional)_     | The notification type. Available values are `comment` and `email`. Default is `comment`          |
+| `enterprise_github` _(optional)_     | `True` if you are using enterprise github and false if not. Default is `False`                   |
+| `repository_owner_type` _(optional)_ | The type of the repository owner (oragnization or user). Default is `user`                       |
+| `smtp_server` _(optional)_           | The mail server address. `Required` only when `notification_type` is set to `email`              |
+| `smtp_port` _(optional)_             | The mail server port. `Required` only when `notification_type` is set to `email`                 |
+| `smtp_username` _(optional)_         | The mail server username. `Required` only when `notification_type` is set to `email`             |
+| `smtp_password` _(optional)_         | The mail server password. `Required` only when `notification_type` is set to `email`             |
+| `smtp_from_email` _(optional)_       | The mail from email address. `Required` only when `notification_type` is set to `email`          |
+| `dry_run` _(optional)_               | `True` if you want to enable dry-run mode. Default is `False`                                    |
 
-### Outputs
 
-| Output                                             | Description                                        |
-|------------------------------------------------------|-----------------------------------------------|
-| `myOutput`  | An example output (returns 'Hello world')    |
-
-## Examples
-
-> NOTE: People ❤️ cut and paste examples. Be generous with them!
-
-### Using the optional input
-
-This is how to use the optional input.
-
-```yaml
-with:
-  myInput: world
-  anotherInput: optional
-```
-
-### Using outputs
-
-Show people how to use your outputs in another action.
-
-```yaml
-steps:
-- uses: actions/checkout@master
-- name: Run action
-  id: myaction
-
-  # Put your action name here
-  uses: me/myaction@master
-
-  # Put an example of your mandatory arguments here
-  with:
-    myInput: world
-
-# Put an example of using your outputs here
-- name: Check outputs
-    run: |
-    echo "Outputs - ${{ steps.myaction.outputs.myOutput }}"
+          smtp_from_email: github@example.com
 ```
