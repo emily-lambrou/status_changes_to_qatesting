@@ -4,13 +4,16 @@ import utils
 import graphql
 
 def notify_change_status():
+    # Initialize previous_statuses as an empty dictionary
+    previous_statuses = {}
+    
     issues = graphql.get_project_issues(
         owner=config.repository_owner,
         owner_type=config.repository_owner_type,
         project_number=config.project_number,
         status_field_name=config.status_field_name,
         filters={'open_only': True},
-        previous_statuses={'In Progress', 'Pending', 'To Do', 'Waiting for Feedback', 'Ready to be Merged', 'In Agenta', 'Deployment Pending', In Review - Staging', 'Done', 'Blocked', 'Paused'}
+        previous_statuses=previous_statuses
     )
 
     # Check if there are issues available
@@ -18,48 +21,44 @@ def notify_change_status():
         logger.info('No issues has been found')
         return
 
-    for projectItem in issues:
-        # node_id for status: MDEzOlByb2plY3RDb2x1bW4zNjk=
-        # if projectItem['id'] != 'MDEzOlByb2plY3RDb2x1bW4zNjk=':
-        #     continue
-        issue = projectItem['content']
+    for issue in issues:
+        # Extract necessary information
+        issue_id = issue['content']['id']
+        status = issue['content']['assignees']['nodes']
 
-        # fieldValueByName provides the status and converting it to a variable
-        status = projectItem['fieldValueByName']['status']
-
-        # Check if the status matches "QA Testing"
-        if status == 'QA Testing':
-            # Get the list of assignees
-            assignees = issue['assignees']['nodes']
-    
+        # Handle the status change logic
+        if previous_statuses.get(issue_id) != 'QA Testing' and status == 'QA Testing':
+            assignees = issue['content']['assignees']['nodes']
+     
             if config.notification_type == 'comment':
-                # Prepare the notification content
                 comment = utils.prepare_issue_comment(
                     issue=issue,
                     assignees=assignees,
                 )
 
                 if not config.dry_run:
-                    # Add the comment to the issue
-                    graphql.add_issue_comment(issue['id'], comment)
+                    graphql.add_issue_comment(issue['content']['id'], comment)
+                
+                logger.info(f'Comment added to issue #{issue["content"]["number"]} ({issue["content"]["id"]})')
 
-                logger.info(f'Comment added to issue #{issue["number"]} ({issue["id"]})')
             elif config.notification_type == 'email':
-                # Prepare the email content
                 subject, message, to = utils.prepare_issue_email_message(
                     issue=issue,
                     assignees=assignees
                 )
 
-                if not config.dry_run:
-                    # Send the email
+                 if not config.dry_run:
                     utils.send_email(
                         from_email=config.smtp_from_email,
                         to_email=to,
                         subject=subject,
                         html_body=message
                     )
-                logger.info(f'Email sent to {to} for issue #{issue["number"]}')
+
+                    logger.info(f'Email sent to {to} for issue #{issue["content"]["number"]}')
+
+            # Update previous_statuses with the current status
+            previous_statuses[issue_id] = status
 
 def main():
     logger.info('Process started...')
