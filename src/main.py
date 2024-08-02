@@ -24,13 +24,12 @@ def notify_change_status():
         issue = projectItem['content']
 
         # fieldValueByName provides the status and converting it to a variable
-        status = projectItem['fieldValuebyName']['status']
+        status = projectItem['fieldValueByName']['status']
 
         # Check if the status matches "QA Testing"
         if status == 'QA Testing':
             # Get the list of assignees
             assignees = issue['assignees']['nodes']
-            
     
             if config.notification_type == 'comment':
                 # Prepare the notification content
