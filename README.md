@@ -39,5 +39,3 @@ Before you can start using this GitHub Action, you'll need to ensure you have th
 | `dry_run` _(optional)_               | `True` if you want to enable dry-run mode. Default is `False`                                    |
 
 
-          smtp_from_email: github@example.com
-```
