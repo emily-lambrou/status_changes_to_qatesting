@@ -5,14 +5,14 @@ import utils
 import graphql
 
 
-def notify_expiring_issues():
+def notify_changes_status():
     if config.is_enterprise:
         # Get the issues
         issues = graphql.get_project_issues(
             owner=config.repository_owner,
             owner_type=config.repository_owner_type,
             project_number=config.project_number,
-            duedate_field_name=config.duedate_field_name,
+            status_field_name=config.status_field_name,
             filters={'open_only': True}
         )
     else:
@@ -20,7 +20,7 @@ def notify_expiring_issues():
         issues = graphql.get_repo_issues(
             owner=config.repository_owner,
             repository=config.repository_name,
-            duedate_field_name=config.duedate_field_name
+            status_field_name=config.status_field_name
         )
 
     # Check if there are issues available
@@ -51,7 +51,7 @@ def notify_expiring_issues():
         if not projectItem['fieldValueByName']:
             continue
 
-        # Get the duedate value and convert it to date object
+        # Get the status value and convert it to date object
         duedate = projectItem["fieldValueByName"]["date"]
         duedate_obj = datetime.strptime(duedate, "%Y-%m-%d").date()
 
