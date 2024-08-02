@@ -28,7 +28,7 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
                       title
                     }
                     fieldValueByName(name: $status) {
-                    // ProjectV2ItemFieldSingleSelectValue represents a single-select dropdown option that will hold the status values such as "QA Testing"
+                    # ProjectV2ItemFieldSingleSelectValue represents a single-select dropdown option that will hold the status values such as "QA Testing"
                       ... on ProjectV2ItemFieldSingleSelectValue {
                         id
                         name
