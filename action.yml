@@ -1,13 +1,55 @@
-name: "Python Container Action Template"
-description: "Get started with Python Container actions"
-author: "Jacob Tomlinson"
-inputs:
-  myInput:
-    description: "Input to use"
-    default: "world"
-outputs:
-  myOutput:
-    description: "Output from the action"
+name: "QA Testing Status Notifier"
+description: "Notify when an issue's status changes to QA Testing by commenting on the issue and sending an email to the assignees."
+author: "Emily Lambrou"
+branding:
+  icon: 'clock'
+  color: 'green'
 runs:
   using: "docker"
   image: "Dockerfile"
+inputs:
+  gh_token:
+    description: "The Personal Token"
+    required: true
+  project_number:
+    description: "The Project Number"
+    required: true
+  notify_for:
+    description: "The type of the notification are about to sent (status_change_to_qatesting, missing_status) "
+    required: true
+    default: "status_change_to_qatesting"  
+  status_field_name:
+    description: "The field name for the status"
+    required: true
+    default: "Status"
+  notification_type:
+    description: "The type of notification (comment,aws_email)"
+    required: true
+    default: 'comment'
+  enterprise_github:
+    description: "Determines if the GitHub is the enterprise ot not (True,False)"
+    required: false
+    default: 'False'
+  repository_owner_type:
+    description: "The type of the repository owner (organization, user)"
+    required: true
+    default: 'user'
+  dry_run:
+    description: "DryRun Mode (True, False)"
+    required: false
+    default: 'False'
+  smtp_server:
+    description: "The mail server address"
+    required: false
+  smtp_port:
+    description: "The mail server port"
+    required: false
+  smtp_username:
+    description: "The mail server username"
+    required: false
+  smtp_password:
+    description: "The mail server password"
+    required: false
+  smtp_from_email:
+    description: "The mail from email address"
+    required: false
