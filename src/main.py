@@ -9,7 +9,8 @@ def notify_change_status():
         owner_type=config.repository_owner_type,
         project_number=config.project_number,
         status_field_name=config.status_field_name,
-        filters={'open_only': True}
+        filters={'open_only': True},
+        previous_statuses={'In Progress', 'Pending', 'To Do', 'Waiting for Feedback', 'Ready to be Merged', 'In Agenta', 'Deployment Pending', In Review - Staging', 'Done', 'Blocked', 'Paused'}
     )
 
     # Check if there are issues available
