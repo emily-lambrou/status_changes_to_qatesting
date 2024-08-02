@@ -151,6 +151,9 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     if filters and previous_statuses:
         filtered_issues = []
         for node in nodes:
+            if filters.get('open_only') and node['content'].get('state') != 'OPEN':
+                continue
+            
             issue_id = node['content']['id']
             current_status = node.get('fieldValueByName', {}).get('name')
 
