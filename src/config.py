@@ -11,7 +11,7 @@ dry_run = True if os.environ.get('INPUT_DRY_RUN') == 'True' else False
 gh_token = os.environ['INPUT_GH_TOKEN']
 project_number = int(os.environ['INPUT_PROJECT_NUMBER'])
 api_endpoint = os.environ['GITHUB_GRAPHQL_URL']
-duedate_field_name = os.environ['INPUT_DUEDATE_FIELD_NAME']
+status_field_name = os.environ['INPUT_STATUS_FIELD_NAME']
 notification_type = os.environ['INPUT_NOTIFICATION_TYPE']
 notify_for = os.environ['INPUT_NOTIFY_FOR']
 
