@@ -2,10 +2,14 @@ from logger import logger
 import config
 import utils
 import graphql
+import json
+import os
+
+PREVIOUS_STATUSES_FILE = 'previous_statuses.json'
 
 def notify_change_status():
-    # Initialize previous_statuses as an empty dictionary
-    previous_statuses = {}
+    # Load previous statuses from the file
+    previous_statuses = load_previous_statuses(PREVIOUS_STATUSES_FILE)
     
     issues = graphql.get_project_issues(
         owner=config.repository_owner,
