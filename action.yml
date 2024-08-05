@@ -8,8 +8,8 @@ runs:
   using: "docker"
   image: "Dockerfile"
 inputs:
-  gh_token:
-    description: "The Personal Token"
+  status_token:
+    description: "GitHub Personal Access Token"
     required: true
   project_number:
     description: "The Project Number"
