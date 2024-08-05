@@ -46,24 +46,25 @@ To set up due date comment notifications, you'll need to create or update a GitH
 an example of a workflow YAML file:
 
 ```yaml
-name: 'Check Issues Due Date'
+name: 'Notify Status Change to QA Testing with Comment'
 
 on:
   schedule:
     - cron: '0 1 * * *'
+  workflow_dispatch:
 
 jobs:
-  reminder:
+  notify_status_change::
     runs-on: ubuntu-latest
     steps:
-      - name: Check duedate and write a comment
-        uses: petrandr/duedate_reminders@latest
+      - name: Check status change and add a comment
+        uses: emily-lambrou/status_changes_to_qatesting@latest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           project_number: 2
-          notify_for: "expiring_issues"
-          duedate_field_name: "Due Date"
+          status_field_name: "Status"
           notification_type: "comment"
+          notify_for: "status_change_to_qatesting"
 ```
 
 #### Expiring Issues With Email
@@ -76,75 +77,27 @@ name: 'Check Issues Due Date'
 on:
   schedule:
     - cron: '0 1 * * *'
+  workflow_dispatch:
 
 jobs:
-  reminder:
+  notify_status_change:
     runs-on: ubuntu-latest
     steps:
-      - name: Check duedate and send email to assignees
-        uses: petrandr/duedate_reminders@latest
+      - name: Check status change and send email to assignees
+        uses: emily-lambrou/status_changes_to_qatesting@latest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           project_number: 2
-          notify_for: "expiring_issues"
-          duedate_field_name: "Due Date"
+          status_field_name: "Status"
           notification_type: "email"
-          smtp_server: smtp.example.com
-          smtp_port: 587
-          smtp_username: ${{secrets.SMTP_USERNAME}}
-          smtp_password: ${{secrets.SMTP_PASSWORD}}
-          smtp_from_email: github@example.com
+          notify_for: "status_change_to_qatesting"
+          smtp_server: smtp.example.com  # Replace with your SMTP server
+          smtp_port: 587  # Replace with your SMTP port
+          smtp_username: ${{ secrets.SMTP_USERNAME }}
+          smtp_password: ${{ secrets.SMTP_PASSWORD }}
+          smtp_from_email: github@example.com  # Replace with your sender email    
 ```
 
-#### Missing Due Date With Comment
-To set up comment notifications for a missing due date value, you'll need to create or update a GitHub Actions workflow in your repository. Below is
-an example of a workflow YAML file:
-
-```yaml
-name: 'Check for missing Due Dates'
-
-on:
-  schedule:
-    - cron: '0 1 * * *'
-
-jobs:
-  reminder:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check for missing due dates and write a comment
-        uses: petrandr/duedate_reminders@latest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          project_number: 2
-          notify_for: "missing_duedate"
-          duedate_field_name: "Due Date"
-          notification_type: "comment"
-```
-
-#### Missing Due Date With Email
-To set up email notifications for a missing due date value, you'll need to create or update a GitHub Actions workflow in your repository. Below is
-an example of a workflow YAML file:
-
-```yaml
-name: 'Check for missing Due Dates'
-
-on:
-  schedule:
-    - cron: '0 1 * * *'
-
-jobs:
-  reminder:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check for missing due dates and send email to assignees
-        uses: petrandr/duedate_reminders@latest
-        with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          project_number: 2
-          notify_for: "missing_duedate"
-          duedate_field_name: "Due Date"
-          notification_type: "email"
-          smtp_server: smtp.example.com
           smtp_port: 587
           smtp_username: ${{secrets.SMTP_USERNAME}}
           smtp_password: ${{secrets.SMTP_PASSWORD}}
