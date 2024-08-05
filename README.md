@@ -39,3 +39,114 @@ Before you can start using this GitHub Action, you'll need to ensure you have th
 | `dry_run` _(optional)_               | `True` if you want to enable dry-run mode. Default is `False`                                    |
 
 
+### Examples
+
+#### Expiring Issues With Comment
+To set up due date comment notifications, you'll need to create or update a GitHub Actions workflow in your repository. Below is
+an example of a workflow YAML file:
+
+```yaml
+name: 'Check Issues Due Date'
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+
+jobs:
+  reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check duedate and write a comment
+        uses: petrandr/duedate_reminders@latest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          project_number: 2
+          notify_for: "expiring_issues"
+          duedate_field_name: "Due Date"
+          notification_type: "comment"
+```
+
+#### Expiring Issues With Email
+To set up due date email notifications, you'll need to create or update a GitHub Actions workflow in your repository. Below is
+an example of a workflow YAML file:
+
+```yaml
+name: 'Check Issues Due Date'
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+
+jobs:
+  reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check duedate and send email to assignees
+        uses: petrandr/duedate_reminders@latest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          project_number: 2
+          notify_for: "expiring_issues"
+          duedate_field_name: "Due Date"
+          notification_type: "email"
+          smtp_server: smtp.example.com
+          smtp_port: 587
+          smtp_username: ${{secrets.SMTP_USERNAME}}
+          smtp_password: ${{secrets.SMTP_PASSWORD}}
+          smtp_from_email: github@example.com
+```
+
+#### Missing Due Date With Comment
+To set up comment notifications for a missing due date value, you'll need to create or update a GitHub Actions workflow in your repository. Below is
+an example of a workflow YAML file:
+
+```yaml
+name: 'Check for missing Due Dates'
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+
+jobs:
+  reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for missing due dates and write a comment
+        uses: petrandr/duedate_reminders@latest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          project_number: 2
+          notify_for: "missing_duedate"
+          duedate_field_name: "Due Date"
+          notification_type: "comment"
+```
+
+#### Missing Due Date With Email
+To set up email notifications for a missing due date value, you'll need to create or update a GitHub Actions workflow in your repository. Below is
+an example of a workflow YAML file:
+
+```yaml
+name: 'Check for missing Due Dates'
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+
+jobs:
+  reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for missing due dates and send email to assignees
+        uses: petrandr/duedate_reminders@latest
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          project_number: 2
+          notify_for: "missing_duedate"
+          duedate_field_name: "Due Date"
+          notification_type: "email"
+          smtp_server: smtp.example.com
+          smtp_port: 587
+          smtp_username: ${{secrets.SMTP_USERNAME}}
+          smtp_password: ${{secrets.SMTP_PASSWORD}}
+          smtp_from_email: github@example.com
+```
