@@ -72,7 +72,7 @@ To set up QA Testing change status email notifications, you'll need to create or
 an example of a workflow YAML file:
 
 ```yaml
-name: 'Check Issues Due Date'
+name: 'Notify Status Change to QA Testing with Email'
 
 on:
   schedule:
