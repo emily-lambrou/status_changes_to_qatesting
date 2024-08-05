@@ -42,7 +42,7 @@ Before you can start using this GitHub Action, you'll need to ensure you have th
 ### Examples
 
 #### Expiring Issues With Comment
-To set up due date comment notifications, you'll need to create or update a GitHub Actions workflow in your repository. Below is
+To set up QA Testing status change comment notifications, you'll need to create or update a GitHub Actions workflow in your repository. Below is
 an example of a workflow YAML file:
 
 ```yaml
@@ -68,7 +68,7 @@ jobs:
 ```
 
 #### Expiring Issues With Email
-To set up due date email notifications, you'll need to create or update a GitHub Actions workflow in your repository. Below is
+To set up QA Testing change status email notifications, you'll need to create or update a GitHub Actions workflow in your repository. Below is
 an example of a workflow YAML file:
 
 ```yaml
