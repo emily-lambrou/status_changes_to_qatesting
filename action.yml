@@ -8,7 +8,7 @@ runs:
   using: "docker"
   image: "Dockerfile"
 inputs:
-  gh_token:
+  status_token:
     description: "The Personal Token"
     required: true
   project_number:
