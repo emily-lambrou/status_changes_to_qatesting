@@ -97,9 +97,3 @@ jobs:
           smtp_password: ${{ secrets.SMTP_PASSWORD }}
           smtp_from_email: github@example.com  # Replace with your sender email    
 ```
-
-          smtp_port: 587
-          smtp_username: ${{secrets.SMTP_USERNAME}}
-          smtp_password: ${{secrets.SMTP_PASSWORD}}
-          smtp_from_email: github@example.com
-```
