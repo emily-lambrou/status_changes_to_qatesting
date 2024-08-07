@@ -58,7 +58,7 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
     response = requests.post(
         config.api_endpoint,
         json={"query": query, "variables": variables},
-        headers={"Authorization": f"Bearer {config.status_token}"}
+        headers={"Authorization": f"Bearer {config.gh_token}"}
     )
 
     if response.json().get('errors'):
@@ -136,7 +136,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     response = requests.post(
         config.api_endpoint,
         json={"query": query, "variables": variables},
-        headers={"Authorization": f"Bearer {config.status_token}"}
+        headers={"Authorization": f"Bearer {config.gh_token}"}
     )
 
     if response.json().get('errors'):
