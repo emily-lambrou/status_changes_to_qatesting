@@ -8,7 +8,7 @@ server_url = os.environ['GITHUB_SERVER_URL']
 is_enterprise = True if os.environ.get('INPUT_ENTERPRISE_GITHUB') == 'True' else False
 dry_run = True if os.environ.get('INPUT_DRY_RUN') == 'True' else False
 
-gh_token = os.environ['INPUT_STATUS_TOKEN']
+gh_token = os.environ['INPUT_GH_TOKEN']
 project_number = int(os.environ['INPUT_PROJECT_NUMBER'])
 api_endpoint = os.environ['GITHUB_GRAPHQL_URL']
 status_field_name = os.environ['INPUT_STATUS_FIELD_NAME']
