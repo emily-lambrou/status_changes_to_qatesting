@@ -28,14 +28,23 @@ def notify_change_status():
     # Load previous statuses from the file
     previous_statuses = load_previous_statuses(previous_statuses_file)
     
-    issues = graphql.get_project_issues(
-        owner=config.repository_owner,
-        owner_type=config.repository_owner_type,
-        project_number=config.project_number,
-        status_field_name=config.status_field_name,
-        filters={'open_only': True},
-        previous_statuses=previous_statuses
-    )
+    if config.is_enterprise:
+        # Get the issues
+        issues = graphql.get_project_issues(
+            owner=config.repository_owner,
+            owner_type=config.repository_owner_type,
+            project_number=config.project_number,
+            status_field_name=config.status_field_name,
+            filters={'open_only': True},
+            previous_statuses=previous_statuses
+        )
+    else:
+         issues = graphql.get_repo_issues(
+            owner=config.repository_owner,
+            repository=config.repository_name,
+            status_field_name=config.status_field_name
+        )
+            
 
     # Check if there are issues available
     if not issues:
