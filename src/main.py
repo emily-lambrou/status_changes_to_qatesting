@@ -54,7 +54,7 @@ def notify_change_status():
     for issue in issues:
         # Extract necessary information
         issue_id = issue['content']['id']
-        status = issue.get('fieldValueByName', {}).get('status')
+        status = issue.get('fieldValueByName', {}).get('name')
 
         # Handle the status change logic
         if previous_statuses.get(issue_id) != 'QA Testing' and status == 'QA Testing':
