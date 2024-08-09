@@ -55,19 +55,30 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
         'after': after
     }
 
+
     response = requests.post(
         config.api_endpoint,
         json={"query": query, "variables": variables},
         headers={"Authorization": f"Bearer {config.gh_token}"}
     )
 
-    if response.json().get('errors'):
-        print(response.json().get('errors'))
+    data = response.json()
 
-    pageinfo = response.json().get('data').get('repository').get('issues').get('pageInfo')
+    if data.get('errors'):
+        print(data.get('errors'))
+    
+    # Add debug print statement
+    pprint(data)
+
+    repository_data = data.get('data', {}).get('repository', {})
+    issues_data = repository_data.get('issues', {})
+    pageinfo = issues_data.get('pageInfo', {})
+    nodes = issues_data.get('nodes', [])
+
+ 
     if issues is None:
         issues = []
-    issues = issues + response.json().get('data').get('repository').get('issues').get('nodes')
+    issues = issues + nodes
     if pageinfo.get('hasNextPage'):
         return get_repo_issues(
             owner=owner,
@@ -139,10 +150,20 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
         headers={"Authorization": f"Bearer {config.gh_token}"}
     )
 
-    if response.json().get('errors'):
-        print(response.json().get('errors'))
+    data = response.json()
 
-    pageinfo = response.json().get('data').get(owner_type).get('projectV2').get('items').get('pageInfo')
+    if data.get('errors'):
+        print(data.get('errors'))
+
+    # Add debug print statement
+    pprint(data)
+
+    owner_data = data.get('data', {}).get(owner_type, {})
+    project_data = owner_data.get('projectV2', {})
+    items_data = project_data.get('items', {})
+    pageinfo = items_data.get('pageInfo', {})
+    nodes = items_data.get('nodes', [])
+
     if issues is None:
         issues = []
 
