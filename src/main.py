@@ -58,9 +58,14 @@ def notify_change_status():
         # Print the issue dictionary for debugging
         logger.debug(f'Issue data: {json.dumps(issue, indent=4)}')
 
-        # Extract necessary information
-        issue_id = issue['content']['id']
-        status = issue.get('fieldValueByName', {}).get('name')
+        # Extract necessary information and providing default values if the keys are missing
+        content = issue.get('content', {})
+        issue_id = content.get('id', 'Unknown ID')
+        status = issue.get('fieldValueByName', {}).get('name', 'Unknown Status')
+        issue_number = content.get('number', 'Unknown Number')
+        
+        # issue_id = issue['content']['id']
+        # status = issue.get('fieldValueByName', {}).get('name')
 
         # Handle the status change logic
         if previous_statuses.get(issue_id) != 'QA Testing' and status == 'QA Testing':
