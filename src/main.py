@@ -67,6 +67,10 @@ def notify_change_status():
         # issue_id = issue['content']['id']
         # status = issue.get('fieldValueByName', {}).get('name')
 
+         # Log issue details for further debugging
+        logger.info(f'Processing issue #{issue_number} with ID: {issue_id} and status: {status}')
+
+
         # Handle the status change logic
         if previous_statuses.get(issue_id) != 'QA Testing' and status == 'QA Testing':
             assignees = issue['content']['assignees']['nodes']
