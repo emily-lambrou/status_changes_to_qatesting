@@ -60,9 +60,10 @@ def notify_change_status():
 
         # Extract necessary information and providing default values if the keys are missing
         content = issue.get('content', {})
-        issue_id = content.get('id', 'Unknown ID')
-        status = issue.get('fieldValueByName', {}).get('name', 'Unknown Status')
+        issue_id = content.get('id')
+        status = issue.get('fieldValueByName', {}).get('name')
         issue_number = content.get('number', 'Unknown Number')
+        assignees = content.get('assignees', {}).get('nodes', [])
         
         # issue_id = issue['content']['id']
         # status = issue.get('fieldValueByName', {}).get('name')
@@ -70,10 +71,14 @@ def notify_change_status():
          # Log issue details for further debugging
         logger.info(f'Processing issue #{issue_number} with ID: {issue_id} and status: {status}')
 
+        # Check if 'id' is missing and log it
+        if issue_id is None:
+            logger.warning(f'Missing "id" in issue data: {json.dumps(issue, indent=4)}')
+            continue
 
         # Handle the status change logic
         if previous_statuses.get(issue_id) != 'QA Testing' and status == 'QA Testing':
-            assignees = issue['content']['assignees']['nodes']
+          #  assignees = issue['content']['assignees']['nodes']
      
             if config.notification_type == 'comment':
                 comment = utils.prepare_issue_comment(
