@@ -115,10 +115,8 @@ def main():
     if config.dry_run:
         logger.info('DRY RUN MODE ON!')
 
-    if config.notify_for == 'status_change_to_qatesting':
         notify_change_status()
-    else:
-        raise Exception('Unsupported value for argument \'notify_for\'')
-
+   
+       
 if __name__ == "__main__":
     main()
