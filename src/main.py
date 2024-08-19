@@ -27,6 +27,9 @@ previous_statuses_file = 'previous_statuses.json'
 def notify_change_status():
     # Load previous statuses from the file
     previous_statuses = load_previous_statuses(previous_statuses_file)
+
+    # Print the loaded previous statuses for debugging
+    print("Loaded previous statuses:", json.dumps(previous_statuses, indent=4))
     
     if config.is_enterprise:
         # Get the issues
