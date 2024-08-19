@@ -29,7 +29,7 @@ def notify_change_status():
     previous_statuses = load_previous_statuses(previous_statuses_file)
 
     # Print the loaded previous statuses for debugging
-    print("Loaded previous statuses:", json.dumps(previous_statuses, indent=4))
+    print("Loaded previous statuses: ", json.dumps(previous_statuses, indent=4))
     
     if config.is_enterprise:
         # Get the issues
@@ -55,6 +55,9 @@ def notify_change_status():
         return
 
     for issue in issues:
+        # Print the issue dictionary for debugging
+        logger.debug(f'Issue data: {json.dumps(issue, indent=4)}')
+
         # Extract necessary information
         issue_id = issue['content']['id']
         status = issue.get('fieldValueByName', {}).get('name')
