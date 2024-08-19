@@ -64,7 +64,6 @@ jobs:
           project_number: 2
           status_field_name: "Status"
           notification_type: "comment"
-          notify_for: "status_change_to_qatesting"
 ```
 
 #### Expiring Issues With Email
@@ -90,7 +89,6 @@ jobs:
           project_number: 2
           status_field_name: "Status"
           notification_type: "email"
-          notify_for: "status_change_to_qatesting"
           smtp_server: smtp.example.com  # Replace with your SMTP server
           smtp_port: 587  # Replace with your SMTP port
           smtp_username: ${{ secrets.SMTP_USERNAME }}
