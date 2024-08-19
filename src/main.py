@@ -56,47 +56,59 @@ def notify_change_status():
 
     # Loop through issues
     for issue in issues:
-        if config.is_enterprise:
-            projectItem = issue
-            issue = issue['content']
-        else:
-            projectNodes = issue['projectItems']['nodes']
+        # Print the issue object for debugging
+        print("Issue object: ", json.dumps(issue, indent=4))
 
-            if not projectNodes:
-                continue
-
-            # Check if the desired project is assigned to the issue
-            projectItem = next((entry for entry in projectNodes if entry['project']['number'] == config.project_number), None)
-
-        # The fieldValueByName contains the name/value for the Status Field
-        if not projectItem.get('fieldValueByName'):
+        # Ensure 'content' is present
+        issue_content = issue.get('content', {})
+        if not issue_content:
+            logger.warning(f'Issue object does not contain "content": {issue}')
             continue
 
-        # Get the current status value
-        current_status = projectItem['fieldValueByName'].get('name')
+        # Ensure 'id' is present in issue content
+        issue_id = issue_content.get('id')
+        if not issue_id:
+            logger.warning(f'Issue content does not contain "id": {issue_content}')
+            continue
+
+        previous_status = previous_statuses.get(issue_id)
+
+        # Get the project item from issue
+        project_items = issue.get('projectItems', {}).get('nodes', [])
+        if not project_items:
+            logger.warning(f'No project items found for issue {issue_id}')
+            continue
+        
+        # Check the first project item
+        project_item = project_items[0]
+        if not project_item.get('fieldValueByName'):
+            logger.warning(f'Project item does not contain "fieldValueByName": {project_item}')
+            continue
+
+        status = project_item['fieldValueByName'].get('name')
+        if not status:
+            logger.warning(f'No status found in fieldValueByName for project item: {project_item}')
+            continue
 
         # Get the list of assignees
-        assignees = issue.get('assignees', {}).get('nodes', [])
-
-        # Retrieve the previous status
-        previous_status = previous_statuses.get(issue['id'])
+        assignees = issue_content.get('assignees', {}).get('nodes', [])
 
         # Handle the status change logic
-        if previous_status != 'QA Testing' and current_status == 'QA Testing':
+        if previous_status != 'QA Testing' and status == 'QA Testing':
             if config.notification_type == 'comment':
                 comment = utils.prepare_issue_comment(
-                    issue=issue,
+                    issue=issue_content,
                     assignees=assignees,
                 )
 
                 if not config.dry_run:
-                    graphql.add_issue_comment(issue['id'], comment)
+                    graphql.add_issue_comment(issue_id, comment)
                 
-                logger.info(f'Comment added to issue #{issue["number"]} ({issue["id"]})')
+                logger.info(f'Comment added to issue #{issue_content.get("number")} ({issue_id})')
 
             elif config.notification_type == 'email':
                 subject, message, to = utils.prepare_issue_email_message(
-                    issue=issue,
+                    issue=issue_content,
                     assignees=assignees
                 )
 
@@ -108,13 +120,14 @@ def notify_change_status():
                         html_body=message
                     )
 
-                    logger.info(f'Email sent to {to} for issue #{issue["number"]}')
+                    logger.info(f'Email sent to {to} for issue #{issue_content.get("number")}')
 
-        # Update the previous_statuses with the current status
-        previous_statuses[issue['id']] = current_status
+        # Update previous_statuses with the current status
+        previous_statuses[issue_id] = status
 
     # Save the updated statuses to the file
     save_previous_statuses(previous_statuses_file, previous_statuses)
+
 
 def main():
     logger.info('Process started...')
