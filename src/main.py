@@ -42,6 +42,7 @@ def notify_change_status():
             previous_statuses=previous_statuses
         )
     else:
+         # Get the issues
          issues = graphql.get_repo_issues(
             owner=config.repository_owner,
             repository=config.repository_name,
@@ -54,32 +55,34 @@ def notify_change_status():
         logger.info('No issues have been found')
         return
 
+    # Loop through issues
     for issue in issues:
-        # Print the issue dictionary for debugging
-        logger.debug(f'Issue data: {json.dumps(issue, indent=4)}')
+        if config.is_enterprise:
+            projectItem = issue
+            issue = issue['content']
+        else:
+            projectNodes = issue['projectItems']['nodes']
 
-        # Extract necessary information and providing default values if the keys are missing
-        content = issue.get('content', {})
-        issue_id = content.get('id')
-        status = issue.get('fieldValueByName', {}).get('name')
-        issue_number = content.get('number', 'Unknown Number')
-        assignees = content.get('assignees', {}).get('nodes', [])
-        
-        # issue_id = issue['content']['id']
-        # status = issue.get('fieldValueByName', {}).get('name')
+            if not projectNodes:
+                continue
 
-         # Log issue details for further debugging
-        logger.info(f'Processing issue #{issue_number} with ID: {issue_id} and status: {status}')
+            # Check if the desire project is assigned to the issue
+            projectItem = next((entry for entry in projectNodes if entry['project']['number'] == config.project_number),
+                               None)
 
-        # Check if 'id' is missing and log it
-        if issue_id is None:
-            logger.warning(f'Missing "id" in issue data: {json.dumps(issue, indent=4)}')
+        # The fieldValueByName contains the name/value for the Status Field
+        if not projectItem['fieldValueByName']:
             continue
 
+         # Get the status value
+        status = projectItem['fieldValueByName']['name']
+   
+         # Get the list of assignees
+        assignees = issue['assignees']['nodes']
+       
         # Handle the status change logic
-        if previous_statuses.get(issue_id) != 'QA Testing' and status == 'QA Testing':
+        if previous_statuses.get(issue['id']) != 'QA Testing' and status == 'QA Testing':
           #  assignees = issue['content']['assignees']['nodes']
-     
             if config.notification_type == 'comment':
                 comment = utils.prepare_issue_comment(
                     issue=issue,
@@ -87,9 +90,9 @@ def notify_change_status():
                 )
 
                 if not config.dry_run:
-                    graphql.add_issue_comment(issue_id, comment)
+                    graphql.add_issue_comment(issue['id'], comment)
                 
-                logger.info(f'Comment added to issue #{issue["content"]["number"]} ({issue_id})')
+                logger.info(f'Comment added to issue #{issue["number"]} ({issue['id']})')
 
             elif config.notification_type == 'email':
                 subject, message, to = utils.prepare_issue_email_message(
@@ -105,18 +108,17 @@ def notify_change_status():
                         html_body=message
                     )
 
-                    logger.info(f'Email sent to {to} for issue #{issue["content"]["number"]}')
+                    logger.info(f'Email sent to {to} for issue #{issue["number"]}')
 
             # Update previous_statuses with the current status
-            previous_statuses[issue_id] = status
+            previous_statuses[issue['id']] = status
 
 def main():
     logger.info('Process started...')
     if config.dry_run:
         logger.info('DRY RUN MODE ON!')
 
-        notify_change_status()
-   
+    notify_change_status()
        
 if __name__ == "__main__":
     main()
