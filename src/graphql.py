@@ -157,6 +157,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
 
     if data.get('errors'):
         print(data.get('errors'))
+        return issues or []
 
     owner_data = data.get('data', {}).get(owner_type, {})
     project_data = owner_data.get('projectV2', {})
@@ -170,8 +171,8 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     if filters:
         filtered_issues = [] 
         for node in nodes:
-            issue_content = node.get('content', {})
-            if not issue_content:
+            issue_content = node.get('content')
+            if issue_content is None:
                 logging.warning(f'No content found for node: {node}')
                 continue
 
@@ -179,7 +180,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
             if not issue_id:
                 logging.warning(f'No ID found in issue content: {issue_content}')
                 continue
-        
+
             # Ensure 'fieldValueByName' is not None
             field_value = node.get('fieldValueByName')
             if field_value is None:
@@ -227,6 +228,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
         )
 
     return issues
+
 
 
 def add_issue_comment(issueId, comment):
