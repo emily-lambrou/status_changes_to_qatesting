@@ -36,15 +36,6 @@ def notify_change_status():
     print("Previous statuses: ", json.dumps(previous_statuses, indent=4))
 
     if config.is_enterprise:
-        # More Debugging
-        print("Fetching issues with the following parameters:")
-        print(f"Owner: {config.repository_owner}")
-        print(f"Owner Type: {config.repository_owner_type}")
-        print(f"Project Number: {config.project_number}")
-        print(f"Status Field Name: {config.status_field_name}")
-        print(f"Previous Statuses: {previous_statuses}")
-
-
         # Get the issues
         issues = graphql.get_project_issues(
             owner=config.repository_owner,
