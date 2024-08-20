@@ -1,14 +1,51 @@
+import json
+import os
 from logger import logger
 import config
 import utils
 import graphql
-import json
 
-# Initialize the in-memory dictionary for previous statuses
-previous_statuses = {}
+# Define the path to the file that will store previous statuses
+previous_statuses_file = 'previous_statuses.json'
+
+def initialize_status_file(file_path):
+    """Initialize the status file with an empty dictionary."""
+    with open(file_path, 'w') as file:
+        json.dump({}, file, indent=4)
+
+def load_previous_statuses(file_path):
+    """Load the previous statuses from a file."""
+    if os.path.exists(file_path):
+        try:
+            with open(file_path, 'r') as file:
+                return json.load(file)
+        except (IOError, json.JSONDecodeError) as e:
+            logger.error(f'Error loading previous statuses: {e}')
+            # Initialize the file with an empty dictionary if there is an error
+            initialize_status_file(file_path)
+            return {}
+    else:
+        # If file does not exist, create and initialize it
+        initialize_status_file(file_path)
+        return {}
+
+def save_previous_statuses(file_path, data):
+    """Save the updated statuses to a file."""
+    try:
+        with open(file_path, 'w') as file:
+            json.dump(data, file, indent=4)
+    except IOError as e:
+        logger.error(f'Error saving previous statuses: {e}')
 
 def notify_change_status():
-    global previous_statuses  # Ensure we're using the global dictionary
+    # Load previous statuses from the file
+    previous_statuses = load_previous_statuses(previous_statuses_file)
+
+    # Log the previous statuses for debugging
+    if not previous_statuses:
+        logger.info('No previous statuses found or file is empty.')
+    else:
+        logger.info(f'Loaded previous statuses: {json.dumps(previous_statuses, indent=4)}')
 
     # Retrieve issues from GraphQL API
     if config.is_enterprise:
@@ -32,6 +69,9 @@ def notify_change_status():
         logger.info('No issues have been found')
         return
 
+    # Initialize an empty dictionary for the updated statuses
+    updated_statuses = {}
+
     # Loop through issues
     for issue in issues:
         # Skip the issues if it's closed
@@ -53,6 +93,7 @@ def notify_change_status():
             logger.warning(f'Issue content does not contain "id": {issue_content}')
             continue
 
+        # Retrieve the previous status for this issue
         previous_status = previous_statuses.get(issue_id)
 
         # Get the project item from issue
@@ -67,6 +108,7 @@ def notify_change_status():
             logger.warning(f'Project item does not contain "fieldValueByName": {project_item}')
             continue
 
+        # Get the current status
         status = project_item['fieldValueByName'].get('name')
         if not status:
             logger.warning(f'No status found in fieldValueByName for project item: {project_item}')
@@ -84,9 +126,11 @@ def notify_change_status():
                 )
 
                 if not config.dry_run:
-                    graphql.add_issue_comment(issue_id, comment)
-                
-                logger.info(f'Comment added to issue #{issue_content.get("number")} ({issue_id})')
+                    response = graphql.add_issue_comment(issue_id, comment)
+                    if response.get('errors'):
+                        logger.error(f'Error adding comment to issue {issue_id}: {response.get("errors")}')
+                    else:
+                        logger.info(f'Comment added to issue #{issue_content.get("number")} ({issue_id})')
 
             elif config.notification_type == 'email':
                 subject, message, to = utils.prepare_issue_email_message(
@@ -104,8 +148,11 @@ def notify_change_status():
 
                     logger.info(f'Email sent to {to} for issue #{issue_content.get("number")}')
 
-        # Update previous_statuses with the current status
-        previous_statuses[issue_id] = status
+        # Update the dictionary with the current status
+        updated_statuses[issue_id] = status
+
+    # Save the updated statuses to the file
+    save_previous_statuses(previous_statuses_file, updated_statuses)
 
 def main():
     logger.info('Process started...')
@@ -113,6 +160,6 @@ def main():
         logger.info('DRY RUN MODE ON!')
 
     notify_change_status()
-       
+
 if __name__ == "__main__":
     main()
