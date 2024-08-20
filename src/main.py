@@ -6,6 +6,8 @@ import config
 import utils
 import graphql
 
+print("Current Working Directory:", os.getcwd())
+
 # Define the path to the file that will store previous statuses
 previous_statuses_file = 'previous_statuses.json'
 
