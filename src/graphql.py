@@ -1,13 +1,14 @@
 from pprint import pprint
+
 import logging
 import requests
 import config
 import utils
 
 # Initialize or retrieve previous_statuses from storage (file, database, etc.)
-previous_statuses = {}  # Ensure this is correctly initialized or retrieved
+previous_statuses = {}  
 
-logging.debug(f"Previous statuses at start: {previous_statuses}")
+logging.debug(f"Previous statuses: {previous_statuses}")
 
 def get_repo_issues(owner, repository, status_field_name, after=None, issues=None):
     query = """
@@ -60,6 +61,7 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
         'after': after
     }
 
+
     response = requests.post(
         config.api_endpoint,
         json={"query": query, "variables": variables},
@@ -70,7 +72,8 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
 
     if data.get('errors'):
         print(data.get('errors'))
-    
+   
+    # Add debug print statement
     pprint(data)
 
     repository_data = data.get('data', {}).get('repository', {})
@@ -78,10 +81,10 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
     pageinfo = issues_data.get('pageInfo', {})
     nodes = issues_data.get('nodes', [])
 
+ 
     if issues is None:
         issues = []
     issues = issues + nodes
-
     if pageinfo.get('hasNextPage'):
         return get_repo_issues(
             owner=owner,
@@ -156,8 +159,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     data = response.json()
 
     if data.get('errors'):
-        logging.error(f"GraphQL query errors: {data.get('errors')}")
-        return issues or []
+        print(data.get('errors'))
 
     owner_data = data.get('data', {}).get(owner_type, {})
     project_data = owner_data.get('projectV2', {})
@@ -169,43 +171,33 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
         issues = []
 
     if filters:
-        filtered_issues = [] 
+        filtered_issues = []
         for node in nodes:
-            issue_content = node.get('content')
-            if issue_content is None:
-                logging.warning(f'No content found for node: {node}')
+            issue_content = node.get('content', {})
+            if not issue_content:
                 continue
 
             issue_id = issue_content.get('id')
             if not issue_id:
-                logging.warning(f'No ID found in issue content: {issue_content}')
                 continue
-
-            # Ensure 'fieldValueByName' is not None
-            field_value = node.get('fieldValueByName')
-            if field_value is None:
-                logging.warning(f'No fieldValueByName found for issue ID {issue_id}')
-                continue
-
-            current_status = field_value.get('name')
-            if not current_status:
-                logging.warning(f'No status found in fieldValueByName for project item: {node}')
-                continue
-
+   
+            # Get the current issue status
+            current_status = node.get('fieldValueByName', {}).get('name')
             previous_status = previous_statuses.get(issue_id, "Unknown")
+   
             # Apply the 'open_only' filter if specified
             if filters.get('open_only') and issue_content.get('state') != 'OPEN':
                 logging.debug(f"Filtering out issue ID {issue_id} with state {issue_content.get('state')}")
                 continue
-        
+   
             # Check if status has changed to "QA Testing"
             if previous_status != 'QA Testing' and current_status == 'QA Testing':
                 logging.debug(f"Adding issue ID {issue_id} as status changed to 'QA Testing'")
                 filtered_issues.append(node)
-
+   
             # Update the previous status
             previous_statuses[issue_id] = current_status
-
+   
         # Update nodes with the filtered list
         nodes = filtered_issues
 
@@ -228,7 +220,6 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
         )
 
     return issues
-
 
 
 def add_issue_comment(issueId, comment):
