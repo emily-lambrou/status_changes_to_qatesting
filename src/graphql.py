@@ -166,35 +166,35 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     if issues is None:
         issues = []
 
- if filters:
-    filtered_issues = [] 
-    for node in nodes:
-        issue_content = node.get('content', {})
-        if not issue_content:
-            continue
+    if filters:
+        filtered_issues = [] 
+        for node in nodes:
+            issue_content = node.get('content', {})
+            if not issue_content:
+                continue
 
-        issue_id = issue_content.get('id')
-        if not issue_id:
-            continue
-
-        # Get the current issue status
-        current_status = node.get('fieldValueByName', {}).get('name')
-        previous_status = previous_statuses.get(issue_id, "Unknown")
-
-        # Apply the 'open_only' filter if specified
-        if filters.get('open_only') and issue_content.get('state') != 'OPEN':
-            logging.debug(f'Filtering out issue ID {issue_id} with state {issue_content.get('state')}")
-            continue
-
-        # Check if status has changed to "QA Testing"
-        if previous_status != 'QA Testing' and current_status == 'QA Testing':
-            filtered_issues.append(node)
-
-        # Update the previous status
-        previous_statuses[issue_id] = current_status
-
-    # Update nodes with the filtered list
-    nodes = filtered_issues
+            issue_id = issue_content.get('id')
+            if not issue_id:
+                continue
+    
+            # Get the current issue status
+            current_status = node.get('fieldValueByName', {}).get('name')
+            previous_status = previous_statuses.get(issue_id, "Unknown")
+    
+            # Apply the 'open_only' filter if specified
+            if filters.get('open_only') and issue_content.get('state') != 'OPEN':
+                logging.debug(f'Filtering out issue ID {issue_id} with state {issue_content.get('state')}")
+                continue
+    
+            # Check if status has changed to "QA Testing"
+            if previous_status != 'QA Testing' and current_status == 'QA Testing':
+                filtered_issues.append(node)
+    
+            # Update the previous status
+            previous_statuses[issue_id] = current_status
+    
+        # Update nodes with the filtered list
+        nodes = filtered_issues
 
 # Append filtered nodes to issues
 issues = issues + nodes
