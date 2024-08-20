@@ -79,6 +79,12 @@ def notify_change_status():
             logger.warning(f'Issue content does not contain "id": {issue_content}')
             continue
 
+       # Ensure 'fieldValueByName' is not None
+        field_value = node.get('fieldValueByName')
+        if field_value is None:
+            logging.warning(f'No fieldValueByName found for issue ID {issue_id}')
+            continue
+        
         previous_status = previous_statuses.get(issue_id, "Unknown")
         current_status = None
 
