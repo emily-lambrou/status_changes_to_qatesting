@@ -1,5 +1,6 @@
 from pprint import pprint
 
+import logging
 import requests
 import config
 import utils
@@ -182,6 +183,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
 
         # Apply the 'open_only' filter if specified
         if filters.get('open_only') and issue_content.get('state') != 'OPEN':
+            logging.debug(f'Filtering out issue ID {issue_id} with state {issue_content.get('state')}")
             continue
 
         # Check if status has changed to "QA Testing"
