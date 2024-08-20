@@ -165,30 +165,37 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     if issues is None:
         issues = []
 
-    if filters and previous_statuses:
-        filtered_issues = []
-        for node in nodes:
-            issue_content = node.get('content', {})
-            if not issue_content:
-                continue
+ if filters:
+    filtered_issues = [] 
+    for node in nodes:
+        issue_content = node.get('content', {})
+        if not issue_content:
+            continue
 
-            issue_id = issue_content.get('id')
-            if not issue_id:
-                continue
+        issue_id = issue_content.get('id')
+        if not issue_id:
+            continue
 
-            current_status = node.get('fieldValueByName', {}).get('name')
-            previous_status = previous_statuses.get(issue_id, "Unknown")
+        # Get the current issue status
+        current_status = node.get('fieldValueByName', {}).get('name')
+        previous_status = previous_statuses.get(issue_id, "Unknown")
 
-            # Check if status has changed to "QA Testing"
-            if previous_status != 'QA Testing' and current_status == 'QA Testing':
-                filtered_issues.append(node)
+        # Apply the 'open_only' filter if specified
+        if filters.get('open_only') and issue_content.get('state') != 'OPEN':
+            continue
 
-            # Update previous status
-            previous_statuses[issue_id] = current_status
+        # Check if status has changed to "QA Testing"
+        if previous_status != 'QA Testing' and current_status == 'QA Testing':
+            filtered_issues.append(node)
 
-        nodes = filtered_issues
+        # Update the previous status
+        previous_statuses[issue_id] = current_status
 
-    issues = issues + nodes
+    # Update nodes with the filtered list
+    nodes = filtered_issues
+
+# Append filtered nodes to issues
+issues = issues + nodes
 
     if pageinfo.get('hasNextPage'):
         return get_project_issues(
