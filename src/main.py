@@ -42,7 +42,6 @@ def notify_change_status():
         print(f"Owner Type: {config.repository_owner_type}")
         print(f"Project Number: {config.project_number}")
         print(f"Status Field Name: {config.status_field_name}")
-        print(f"Filters: {'open_only': True}")
         print(f"Previous Statuses: {previous_statuses}")
 
 
