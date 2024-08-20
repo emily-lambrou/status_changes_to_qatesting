@@ -5,6 +5,10 @@ import requests
 import config
 import utils
 
+# Initialize or retrieve previous_statuses from storage (file, database, etc.)
+previous_statuses = {}  
+
+logging.debug(f"Previous statuses: {previous_statuses}")
 
 def get_repo_issues(owner, repository, status_field_name, after=None, issues=None):
     query = """
@@ -188,6 +192,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     
             # Check if status has changed to "QA Testing"
             if previous_status != 'QA Testing' and current_status == 'QA Testing':
+                logging.debug(f"Adding issue ID {issue_id} as status changed to 'QA Testing'")
                 filtered_issues.append(node)
     
             # Update the previous status
@@ -195,6 +200,9 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     
         # Update nodes with the filtered list
         nodes = filtered_issues
+
+    # Store or use previous_statuses as needed (e.g., save it for the next run)
+    logging.debug(f"Final previous_statuses: {previous_statuses}")
 
     # Append filtered nodes to issues
     issues = issues + nodes
