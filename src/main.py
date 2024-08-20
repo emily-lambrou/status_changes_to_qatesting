@@ -1,4 +1,4 @@
-import logger import logger
+from logger import logger
 import json
 import os
 import requests
