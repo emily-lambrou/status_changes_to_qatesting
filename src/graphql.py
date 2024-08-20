@@ -155,9 +155,6 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     if data.get('errors'):
         print(data.get('errors'))
 
-    # Add debug print statement
-    pprint(data)
-
     owner_data = data.get('data', {}).get(owner_type, {})
     project_data = owner_data.get('projectV2', {})
     items_data = project_data.get('items', {})
@@ -166,8 +163,6 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
 
     if issues is None:
         issues = []
-
-    nodes = response.json().get('data').get(owner_type).get('projectV2').get('items').get('nodes')
 
     if filters and previous_statuses:
         filtered_issues = []
@@ -179,7 +174,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
             current_status = node.get('fieldValueByName', {}).get('name')
 
             # Check if status has changed to "QA Testing"
-            if previous_statuses.get(issue_id) and previous_statuses[issue_id] != 'QA Testing' and current_status == 'QA Testing':
+            if previous_statuses.get(issue_id) != 'QA Testing' and current_status == 'QA Testing':
                 filtered_issues.append(node)
 
             # Update previous status
