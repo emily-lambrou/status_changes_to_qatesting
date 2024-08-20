@@ -9,7 +9,7 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
     query = """
     query GetRepoIssues($owner: String!, $repo: String!, $status: String!, $after: String) {
           repository(owner: $owner, name: $repo) {
-            issues(first: 100, after: $after) {
+            issues(first: 100, after: $after, states: [OPEN]) {
               nodes {
                 id
                 title
