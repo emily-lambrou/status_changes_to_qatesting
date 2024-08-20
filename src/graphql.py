@@ -156,7 +156,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     data = response.json()
 
     if data.get('errors'):
-        print(data.get('errors'))
+        logging.error(f"GraphQL query errors: {data.get('errors')}")
         return issues or []
 
     owner_data = data.get('data', {}).get(owner_type, {})
