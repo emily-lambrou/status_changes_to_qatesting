@@ -56,6 +56,11 @@ def notify_change_status():
 
     # Loop through issues
     for issue in issues:
+
+        # Skip the issues if it's closed
+        if issue.get('state') == 'CLOSED':
+            continue
+        
         # Print the issue object for debugging
         print("Issue object: ", json.dumps(issue, indent=4))
 
