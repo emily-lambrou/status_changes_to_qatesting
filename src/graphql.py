@@ -4,8 +4,6 @@ import requests
 import config
 import utils
 
-# Initialize the in-memory dictionary for previous statuses
-previous_statuses = {}
 
 def get_repo_issues(owner, repository, status_field_name, after=None, issues=None):
     query = """
@@ -96,48 +94,48 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
 
 def get_project_issues(owner, owner_type, project_number, status_field_name, filters=None, after=None, issues=None, previous_statuses=None):
     query = f"""
-    query GetProjectIssues($owner: String!, $projectNumber: Int!, $status: String!, $after: String)  {{
-          {owner_type}(login: $owner) {{
+    query GetProjectIssues($owner: String!, $projectNumber: Int!, $status: String!, $after: String) {{
+        {owner_type}(login: $owner) {{
             projectV2(number: $projectNumber) {{
-              id
-              title
-              number
-              items(first: 100,after: $after) {{
-                nodes {{
-                  id
-                  fieldValueByName(name: $status) {{
-                    ... on  ProjectV2ItemFieldSingleSelectValue {{
-                      id
-                      name
-                    }}
-                  }}
-                  content {{
-                    ... on Issue {{
-                      id
-                      title
-                      number
-                      state
-                      url
-                      assignees(first:20) {{
-                        nodes {{
-                          name
-                          email
-                          login
+                id
+                title
+                number
+                items(first: 100, after: $after) {{
+                    nodes {{
+                        id
+                        fieldValueByName(name: $status) {{
+                            ... on ProjectV2ItemFieldSingleSelectValue {{
+                                id
+                                name
+                            }}
                         }}
-                      }}
+                        content {{
+                            ... on Issue {{
+                                id
+                                title
+                                number
+                                state
+                                url
+                                assignees(first: 20) {{
+                                    nodes {{
+                                        name
+                                        email
+                                        login
+                                    }}
+                                }}
+                            }}
+                        }}
                     }}
-                  }}
+                    pageInfo {{
+                        endCursor
+                        hasNextPage
+                        hasPreviousPage
+                    }}
+                    totalCount
                 }}
-                pageInfo {{
-                endCursor
-                hasNextPage
-                hasPreviousPage
-              }}
-              totalCount
-              }}
             }}
-          }}
         }}
+    }}
     """
 
     variables = {
@@ -170,19 +168,24 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     if filters and previous_statuses:
         filtered_issues = []
         for node in nodes:
-            if filters.get('open_only') and node['content'].get('state') != 'OPEN':
+            issue_content = node.get('content', {})
+            if not issue_content:
                 continue
-            
-            issue_id = node['content']['id']
+
+            issue_id = issue_content.get('id')
+            if not issue_id:
+                continue
+
             current_status = node.get('fieldValueByName', {}).get('name')
+            previous_status = previous_statuses.get(issue_id, "Unknown")
 
             # Check if status has changed to "QA Testing"
-            if previous_statuses.get(issue_id) != 'QA Testing' and current_status == 'QA Testing':
+            if previous_status != 'QA Testing' and current_status == 'QA Testing':
                 filtered_issues.append(node)
 
             # Update previous status
             previous_statuses[issue_id] = current_status
-              
+
         nodes = filtered_issues
 
     issues = issues + nodes
