@@ -196,8 +196,8 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
         # Update nodes with the filtered list
         nodes = filtered_issues
 
-# Append filtered nodes to issues
-issues = issues + nodes
+    # Append filtered nodes to issues
+    issues = issues + nodes
 
     if pageinfo.get('hasNextPage'):
         return get_project_issues(
