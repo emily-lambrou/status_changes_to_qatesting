@@ -2,7 +2,10 @@ from pprint import pprint
 
 import requests
 import config
+import utils
 
+# Initialize the in-memory dictionary for previous statuses
+previous_statuses = {}
 
 def get_repo_issues(owner, repository, status_field_name, after=None, issues=None):
     query = """
