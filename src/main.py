@@ -7,7 +7,7 @@ import utils
 import graphql
 
 # Define the path to the file that will store previous statuses
-previous_statuses_file = 'previous_statuses.json'
+previous_statuses_file = os.path.join(os.path.expanduser('~'), 'Downloads', 'previous_statuses.json')
 
 def load_previous_statuses(file_path):
     """Load the previous statuses from a file."""
