@@ -1,14 +1,13 @@
 from pprint import pprint
-
 import logging
 import requests
 import config
 import utils
 
 # Initialize or retrieve previous_statuses from storage (file, database, etc.)
-previous_statuses = {}  
+previous_statuses = {}  # Ensure this is correctly initialized or retrieved
 
-logging.debug(f"Previous statuses: {previous_statuses}")
+logging.debug(f"Previous statuses at start: {previous_statuses}")
 
 def get_repo_issues(owner, repository, status_field_name, after=None, issues=None):
     query = """
@@ -61,7 +60,6 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
         'after': after
     }
 
-
     response = requests.post(
         config.api_endpoint,
         json={"query": query, "variables": variables},
@@ -73,7 +71,6 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
     if data.get('errors'):
         print(data.get('errors'))
     
-    # Add debug print statement
     pprint(data)
 
     repository_data = data.get('data', {}).get('repository', {})
@@ -81,10 +78,10 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
     pageinfo = issues_data.get('pageInfo', {})
     nodes = issues_data.get('nodes', [])
 
- 
     if issues is None:
         issues = []
     issues = issues + nodes
+
     if pageinfo.get('hasNextPage'):
         return get_repo_issues(
             owner=owner,
@@ -98,6 +95,9 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
 
 
 def get_project_issues(owner, owner_type, project_number, status_field_name, filters=None, after=None, issues=None, previous_statuses=None):
+    if previous_statuses is None:
+        previous_statuses = {}
+
     query = f"""
     query GetProjectIssues($owner: String!, $projectNumber: Int!, $status: String!, $after: String) {{
         {owner_type}(login: $owner) {{
@@ -181,30 +181,26 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
             if not issue_id:
                 continue
     
-            # Get the current issue status
             current_status = node.get('fieldValueByName', {}).get('name')
             previous_status = previous_statuses.get(issue_id, "Unknown")
     
-            # Apply the 'open_only' filter if specified
+            # Log the current and previous statuses
+            logging.debug(f"Issue ID: {issue_id}, Previous Status: {previous_status}, Current Status: {current_status}")
+
             if filters.get('open_only') and issue_content.get('state') != 'OPEN':
                 logging.debug(f"Filtering out issue ID {issue_id} with state {issue_content.get('state')}")
                 continue
     
-            # Check if status has changed to "QA Testing"
             if previous_status != 'QA Testing' and current_status == 'QA Testing':
                 logging.debug(f"Adding issue ID {issue_id} as status changed to 'QA Testing'")
                 filtered_issues.append(node)
     
-            # Update the previous status
             previous_statuses[issue_id] = current_status
     
-        # Update nodes with the filtered list
         nodes = filtered_issues
 
-    # Store or use previous_statuses as needed (e.g., save it for the next run)
     logging.debug(f"Final previous_statuses: {previous_statuses}")
 
-    # Append filtered nodes to issues
     issues = issues + nodes
 
     if pageinfo.get('hasNextPage'):
