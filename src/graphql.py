@@ -242,12 +242,20 @@ def add_issue_comment(issueId, comment):
         'issueId': issueId,
         'comment': comment
     }
-    response = requests.post(
-        config.api_endpoint,
-        json={"query": mutation, "variables": variables},
-        headers={"Authorization": f"Bearer {config.gh_token}"}
-    )
-    if response.json().get('errors'):
-        print(response.json().get('errors'))
 
-    return response.json().get('data')
+    try:
+        response = requests.post(
+            config.api_endpoint,
+            json={"query": mutation, "variables": variables},
+            headers={"Authorization": f"Bearer {config.gh_token}"}
+        )
+        data = response.json()
+
+        if 'errors' in data:
+            logging.error(f"GraphQL mutation errors: {data['errors']}")
+
+        return data.get('data')
+
+    except requests.RequestException as e:
+        logging.error(f"Request error: {e}")
+        return {}
