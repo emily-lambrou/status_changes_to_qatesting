@@ -1,17 +1,12 @@
 import json
 import os
-from logger import logger
+import requests
 import config
 import utils
 import graphql
 
 # Define the path to the file that will store previous statuses
 previous_statuses_file = 'previous_statuses.json'
-
-def initialize_status_file(file_path):
-    """Initialize the status file with an empty dictionary."""
-    with open(file_path, 'w') as file:
-        json.dump({}, file, indent=4)
 
 def load_previous_statuses(file_path):
     """Load the previous statuses from a file."""
@@ -21,13 +16,8 @@ def load_previous_statuses(file_path):
                 return json.load(file)
         except (IOError, json.JSONDecodeError) as e:
             logger.error(f'Error loading previous statuses: {e}')
-            # Initialize the file with an empty dictionary if there is an error
-            initialize_status_file(file_path)
             return {}
-    else:
-        # If file does not exist, create and initialize it
-        initialize_status_file(file_path)
-        return {}
+    return {}
 
 def save_previous_statuses(file_path, data):
     """Save the updated statuses to a file."""
@@ -41,14 +31,11 @@ def notify_change_status():
     # Load previous statuses from the file
     previous_statuses = load_previous_statuses(previous_statuses_file)
 
-    # Log the previous statuses for debugging
-    if not previous_statuses:
-        logger.info('No previous statuses found or file is empty.')
-    else:
-        logger.info(f'Loaded previous statuses: {json.dumps(previous_statuses, indent=4)}')
+    # Print the loaded previous statuses for debugging
+    print("Previous statuses: ", json.dumps(previous_statuses, indent=4))
 
-    # Retrieve issues from GraphQL API
     if config.is_enterprise:
+        # Get the issues
         issues = graphql.get_project_issues(
             owner=config.repository_owner,
             owner_type=config.repository_owner_type,
@@ -58,6 +45,7 @@ def notify_change_status():
             previous_statuses=previous_statuses
         )
     else:
+        # Get the issues
         issues = graphql.get_repo_issues(
             owner=config.repository_owner,
             repository=config.repository_name,
@@ -68,9 +56,6 @@ def notify_change_status():
     if not issues:
         logger.info('No issues have been found')
         return
-
-    # Initialize an empty dictionary for the updated statuses
-    updated_statuses = {}
 
     # Loop through issues
     for issue in issues:
@@ -93,8 +78,8 @@ def notify_change_status():
             logger.warning(f'Issue content does not contain "id": {issue_content}')
             continue
 
-        # Retrieve the previous status for this issue
-        previous_status = previous_statuses.get(issue_id)
+        previous_status = previous_statuses.get(issue_id, "Unknown")
+        current_status = None
 
         # Get the project item from issue
         project_items = issue.get('projectItems', {}).get('nodes', [])
@@ -108,34 +93,28 @@ def notify_change_status():
             logger.warning(f'Project item does not contain "fieldValueByName": {project_item}')
             continue
 
-        # Get the current status
-        status = project_item['fieldValueByName'].get('name')
-        if not status:
+        current_status = project_item['fieldValueByName'].get('name')
+        if not current_status:
             logger.warning(f'No status found in fieldValueByName for project item: {project_item}')
             continue
 
-        # Get the list of assignees
-        assignees = issue_content.get('assignees', {}).get('nodes', [])
-
         # Handle the status change logic
-        if previous_status != 'QA Testing' and status == 'QA Testing':
+        if previous_status != 'QA Testing' and current_status == 'QA Testing':
             if config.notification_type == 'comment':
                 comment = utils.prepare_issue_comment(
                     issue=issue_content,
-                    assignees=assignees,
+                    assignees=issue_content.get('assignees', {}).get('nodes', []),
                 )
 
                 if not config.dry_run:
-                    response = graphql.add_issue_comment(issue_id, comment)
-                    if response.get('errors'):
-                        logger.error(f'Error adding comment to issue {issue_id}: {response.get("errors")}')
-                    else:
-                        logger.info(f'Comment added to issue #{issue_content.get("number")} ({issue_id})')
+                    graphql.add_issue_comment(issue_id, comment)
+                
+                logger.info(f'Comment added to issue #{issue_content.get("number")} ({issue_id})')
 
             elif config.notification_type == 'email':
                 subject, message, to = utils.prepare_issue_email_message(
                     issue=issue_content,
-                    assignees=assignees
+                    assignees=issue_content.get('assignees', {}).get('nodes', [])
                 )
 
                 if not config.dry_run:
@@ -148,11 +127,11 @@ def notify_change_status():
 
                     logger.info(f'Email sent to {to} for issue #{issue_content.get("number")}')
 
-        # Update the dictionary with the current status
-        updated_statuses[issue_id] = status
+        # Update previous_statuses with the current status
+        previous_statuses[issue_id] = current_status
 
     # Save the updated statuses to the file
-    save_previous_statuses(previous_statuses_file, updated_statuses)
+    save_previous_statuses(previous_statuses_file, previous_statuses)
 
 def main():
     logger.info('Process started...')
@@ -160,6 +139,6 @@ def main():
         logger.info('DRY RUN MODE ON!')
 
     notify_change_status()
-
+       
 if __name__ == "__main__":
     main()
