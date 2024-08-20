@@ -3,36 +3,15 @@ import config
 import utils
 import graphql
 import json
-import os
 
-def load_previous_statuses(file_path):
-    if os.path.exists(file_path):
-        try:
-            with open(file_path, 'r') as file:
-                return json.load(file)
-        except (IOError, json.JSONDecodeError) as e:
-            logger.error(f'Error loading previous statuses: {e}')
-            return {}
-    return {}
-
-def save_previous_statuses(file_path, data):
-    try:
-        with open(file_path, 'w') as file:
-            json.dump(data, file, indent=4)
-    except IOError as e:
-        logger.error(f'Error saving previous statuses: {e}')
-
-previous_statuses_file = 'previous_statuses.json'
+# Initialize the in-memory dictionary for previous statuses
+previous_statuses = {}
 
 def notify_change_status():
-    # Load previous statuses from the file
-    previous_statuses = load_previous_statuses(previous_statuses_file)
+    global previous_statuses  # Ensure we're using the global dictionary
 
-    # Print the loaded previous statuses for debugging
-    print("Loaded previous statuses: ", json.dumps(previous_statuses, indent=4))
-    
+    # Retrieve issues from GraphQL API
     if config.is_enterprise:
-        # Get the issues
         issues = graphql.get_project_issues(
             owner=config.repository_owner,
             owner_type=config.repository_owner_type,
@@ -42,7 +21,6 @@ def notify_change_status():
             previous_statuses=previous_statuses
         )
     else:
-        # Get the issues
         issues = graphql.get_repo_issues(
             owner=config.repository_owner,
             repository=config.repository_name,
@@ -56,7 +34,6 @@ def notify_change_status():
 
     # Loop through issues
     for issue in issues:
-
         # Skip the issues if it's closed
         if issue.get('state') == 'CLOSED':
             continue
@@ -129,10 +106,6 @@ def notify_change_status():
 
         # Update previous_statuses with the current status
         previous_statuses[issue_id] = status
-
-    # Save the updated statuses to the file
-    save_previous_statuses(previous_statuses_file, previous_statuses)
-
 
 def main():
     logger.info('Process started...')
