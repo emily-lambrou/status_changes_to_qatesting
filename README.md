@@ -43,23 +43,32 @@ To set up QA Testing status change comment notifications, you'll need to create 
 an example of a workflow YAML file:
 
 ```yaml
-name: 'Notify Status Change to QA Testing with Comment'
+name: Testing Status
 
+# Runs every minute
 on:
   schedule:
     - cron: '* * * * *'
   workflow_dispatch:
 
 jobs:
-  notify_status_change::
+  check_status:
     runs-on: self-hosted
+
     steps:
-      - name: Check status change and add a comment
-        uses: emily-lambrou/status_changes_to_qatesting@latest
+      # Checkout the code to be used by runner
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+
+      # Check for status changes
+      - name: Check for status changes
+        uses: emily-lambrou/status_changes_to_qatesting@v1.2
         with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          dry_run: ${{ vars.DRY_RUN }}              
+          dry_run: ${{ vars.DRY_RUN }}           
+          gh_token: ${{ secrets.GH_TOKEN }}      
           project_number: ${{ vars.PROJECT_NUMBER }} 
           enterprise_github: 'True'
           repository_owner_type: organization
+        
 ```
