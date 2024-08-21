@@ -194,7 +194,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
                         logging.info(f"Comment added to issue {issue_id}")
                         filtered_issues.append(node)
                     else:
-                        logging.info(f"Comment already exists for issue {issue_id")
+                        logging.info(f"Comment already exists for issue {issue_id}")
 
             # Update nodes with the filtered list
             nodes = filtered_issues
