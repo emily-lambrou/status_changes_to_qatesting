@@ -16,10 +16,3 @@ notification_type = os.environ['INPUT_NOTIFICATION_TYPE']
 
 if notification_type not in ['comment', 'email']:
     raise Exception(f'Unsupported notification type {notification_type}')
-
-if notification_type == 'email':
-    smtp_server = os.environ['INPUT_SMTP_SERVER']
-    smtp_port = os.environ['INPUT_SMTP_PORT']
-    smtp_username = os.environ['INPUT_SMTP_USERNAME']
-    smtp_password = os.environ['INPUT_SMTP_PASSWORD']
-    smtp_from_email = os.environ['INPUT_SMTP_FROM_EMAIL']
