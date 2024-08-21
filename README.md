@@ -1,4 +1,4 @@
-# Status changes to "QA Testing" Notifications
+# Status changes to "QA Testing"
 
 GitHub doesn't provide a built-in way to send notifications if the status is changing. This
 GitHub Action aims to address this by allowing you to manage the changes within a central GitHub project.
