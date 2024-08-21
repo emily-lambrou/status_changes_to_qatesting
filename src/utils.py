@@ -19,7 +19,7 @@ def prepare_issue_comment(issue: dict, assignees: dict):
     else:
         logger.info(f'No assignees found for issue #{issue["number"]}')
 
-    comment += f'This issue is now in QA Testing. Please proceed with the necessary testing.'
+    comment += f'This issue is now in QA Testing. @tantoniou  Please proceed with the necessary testing.'
     logger.info(f'Issue {issue["title"]} | {comment}')
 
     return comment
@@ -40,7 +40,7 @@ def prepare_issue_email_message(issue, assignees):
         logger.info(f'No assignees found for issue #{issue["number"]}')
 
     message = f'Assignees: {_assignees}' \
-              f'<br>This issue is now in QA Testing. Please proceed with the necessary testing.' \
+              f'<br>This issue is now in QA Testing. @tantoniou Please proceed with the necessary testing.' \
               f'<br><br>{issue["url"]}'
 
     return [subject, message, mail_to]
