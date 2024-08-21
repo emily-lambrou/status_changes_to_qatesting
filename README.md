@@ -2,6 +2,8 @@
 
 GitHub doesn't provide a built-in way to send notifications if the status is changing. This
 GitHub Action aims to address this by allowing you to manage the changes within a central GitHub project.
+For this case I only focus to the "QA Testing" status. However, if you are interested for any other status, 
+you can modify it.
 
 ## Introduction
 
@@ -26,9 +28,8 @@ Before you can start using this GitHub Action, you'll need to ensure you have th
 | Input                                | Description                                                                                      |
 |--------------------------------------|--------------------------------------------------------------------------------------------------|
 | `gh_token`                           | The GitHub Token                                                                                 |
-| `project_number`                     | The project number                                                                               |
-|                                                                                                                                         |
-| `status_field_name` _(optional)_    | The status field name. The default is `Status`                                                    |
+| `project_number`                     | The project number                                                                               |                                                          
+| `status_field_name` _(optional)_     | The status field name. The default is `Status`                                                   |
 | `notification_type` _(optional)_     | The notification type. Available values are `comment` and `email`. Default is `comment`          |
 | `enterprise_github` _(optional)_     | `True` if you are using enterprise github and false if not. Default is `False`                   |
 | `repository_owner_type` _(optional)_ | The type of the repository owner (oragnization or user). Default is `user`                       |
