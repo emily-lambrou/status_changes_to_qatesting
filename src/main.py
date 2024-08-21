@@ -78,7 +78,7 @@ def notify_change_status():
         # Check if the current status is "QA Testing"
         if current_status == 'QA Testing':
             # Prepare the comment text
-            comment_text = "This issue is now in QA Testing."
+            comment_text = "This issue is now in QA Testing. Please proceed with the necessary testing."
             
             # Check if the comment already exists
             if not check_comment_exists(issue_id, comment_text):
