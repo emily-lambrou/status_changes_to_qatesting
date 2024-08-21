@@ -30,7 +30,7 @@ Before you can start using this GitHub Action, you'll need to ensure you have th
 | `gh_token`                           | The GitHub Token                                                                                 |
 | `project_number`                     | The project number                                                                               |                                                          
 | `status_field_name` _(optional)_     | The status field name. The default is `Status`                                                   |
-| `notification_type` _(optional)_     | The notification type. Available values are `comment` and `email`. Default is `comment`          |
+| `notification_type` _(optional)_     | The notification type. Default is `comment`          |
 | `enterprise_github` _(optional)_     | `True` if you are using enterprise github and false if not. Default is `False`                   |
 | `repository_owner_type` _(optional)_ | The type of the repository owner (oragnization or user). Default is `user`                       |
 | `dry_run` _(optional)_               | `True` if you want to enable dry-run mode. Default is `False`                                    |
