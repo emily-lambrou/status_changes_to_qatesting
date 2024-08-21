@@ -2,7 +2,6 @@ import config
 from logger import logger
 import graphql
 
-
 def prepare_issue_comment(issue: dict, assignees: dict):
     """
     Prepare the comment from the given arguments and return it
