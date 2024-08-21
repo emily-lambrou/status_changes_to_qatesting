@@ -2,7 +2,8 @@
 
 GitHub doesn't provide a built-in way to send notifications if the status is changing. This
 GitHub Action aims to address this by allowing you to manage the changes within a central GitHub project.
-For this case I only focus to the "QA Testing" status. However, if you are interested for any other status, 
+
+In this case I only focus to the "QA Testing" status. However, if you are interested for any other status, 
 you can modify it.
 
 ## Introduction
