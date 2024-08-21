@@ -6,14 +6,6 @@ import config
 import utils
 import graphql
 
-def check_comment_exists(issue_id, comment_text):
-    """Check if the comment already exists on the issue."""
-    comments = graphql.get_issue_comments(issue_id)
-    for comment in comments:
-        if comment_text in comment.get('body', ''):
-            return True
-    return False
-
 def notify_change_status():
     if config.is_enterprise:
         # Get the issues
@@ -81,7 +73,7 @@ def notify_change_status():
             comment_text = "This issue is now in QA Testing. Please proceed with the necessary testing."
             
             # Check if the comment already exists
-            if not check_comment_exists(issue_id, comment_text):
+            if not utils.check_comment_exists(issue_id, comment_text):
                 if config.notification_type == 'comment':
                     comment = utils.prepare_issue_comment(
                         issue=issue_content,
