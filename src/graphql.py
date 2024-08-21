@@ -187,10 +187,10 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
                 # Check if status is "QA Testing"
                 if current_status == 'QA Testing':
                     # Check if a comment already exists on the issue
-                    if not utils.check_comment_exists(issue_id, "This issue is now in QA Testing. Please proceed with the necessary testing."):
+                    if not utils.check_comment_exists(issue_id, "This issue is now in QA Testing. @tantoniou Please proceed with the necessary testing."):
                         logging.debug(f"Adding issue ID {issue_id} as status is 'QA Testing'")
                         # Add comment
-                        add_issue_comment(issue_id, "This issue is now in QA Testing. Please proceed with the necessary testing.")
+                        add_issue_comment(issue_id, "This issue is now in QA Testing. @tantoniou Please proceed with the necessary testing.")
                         logging.info(f"Comment added to issue {issue_id}")
                         filtered_issues.append(node)
                     else:
