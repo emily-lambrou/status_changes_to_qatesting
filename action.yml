@@ -34,18 +34,3 @@ inputs:
     description: "DryRun Mode (True, False)"
     required: false
     default: 'False'
-  smtp_server:
-    description: "The mail server address"
-    required: false
-  smtp_port:
-    description: "The mail server port"
-    required: false
-  smtp_username:
-    description: "The mail server username"
-    required: false
-  smtp_password:
-    description: "The mail server password"
-    required: false
-  smtp_from_email:
-    description: "The mail from email address"
-    required: false
