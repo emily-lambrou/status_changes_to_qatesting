@@ -4,6 +4,7 @@ import config
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from logger import logger
+import graphql
 
 
 def prepare_issue_comment(issue: dict, assignees: dict):
@@ -68,3 +69,12 @@ def send_email(from_email: str, to_email: list, subject: str, html_body: str):
     smtp_server.sendmail(from_email, to_email, text)
 
     smtp_server.quit()
+
+
+def check_comment_exists(issue_id, comment_text):
+    """Check if the comment already exists on the issue."""
+    comments = graphql.get_issue_comments(issue_id)
+    for comment in comments:
+        if comment_text in comment.get('body', ''):
+            return True
+    return False
