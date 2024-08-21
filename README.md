@@ -38,7 +38,7 @@ Before you can start using this GitHub Action, you'll need to ensure you have th
 
 ### Examples
 
-#### Expiring Issues With Comment
+#### Status changes to "QA Testing" With Comment
 To set up QA Testing status change comment notifications, you'll need to create or update a GitHub Actions workflow in your repository. Below is
 an example of a workflow YAML file:
 
@@ -47,18 +47,19 @@ name: 'Notify Status Change to QA Testing with Comment'
 
 on:
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '* * * * *'
   workflow_dispatch:
 
 jobs:
   notify_status_change::
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Check status change and add a comment
         uses: emily-lambrou/status_changes_to_qatesting@latest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          project_number: 2
-          status_field_name: "Status"
-          notification_type: "comment"
+          dry_run: ${{ vars.DRY_RUN }}              
+          project_number: ${{ vars.PROJECT_NUMBER }} 
+          enterprise_github: 'True'
+          repository_owner_type: organization
 ```
