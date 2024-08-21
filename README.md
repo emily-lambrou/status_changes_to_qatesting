@@ -64,7 +64,7 @@ jobs:
 
       # Check for status changes
       - name: Check for status changes
-        uses: emily-lambrou/status_changes_to_qatesting@v1.2
+        uses: emily-lambrou/status_changes_to_qatesting@v1.3
         with:
           dry_run: ${{ vars.DRY_RUN }}           
           gh_token: ${{ secrets.GH_TOKEN }}      
