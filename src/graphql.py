@@ -1,14 +1,8 @@
 from pprint import pprint
-
 import logging
 import requests
 import config
 import utils
-
-# Initialize or retrieve previous_statuses from storage (file, database, etc.)
-previous_statuses = {}  
-
-logging.debug(f"Previous statuses: {previous_statuses}")
 
 logging.basicConfig(level=logging.DEBUG)  # Ensure logging is set up
 
@@ -36,7 +30,6 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
                       title
                     }
                     fieldValueByName(name: $status) {
-                    # ProjectV2ItemFieldSingleSelectValue represents a single-select dropdown option that will hold the status values such as "QA Testing"
                       ... on ProjectV2ItemFieldSingleSelectValue {
                         id
                         name
@@ -63,7 +56,6 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
         'after': after
     }
 
-
     response = requests.post(
         config.api_endpoint,
         json={"query": query, "variables": variables},
@@ -83,7 +75,6 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
     pageinfo = issues_data.get('pageInfo', {})
     nodes = issues_data.get('nodes', [])
 
- 
     if issues is None:
         issues = []
     issues = issues + nodes
@@ -98,8 +89,7 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
 
     return issues
 
-
-def get_project_issues(owner, owner_type, project_number, status_field_name, filters=None, after=None, issues=None, previous_statuses=None):
+def get_project_issues(owner, owner_type, project_number, status_field_name, filters=None, after=None, issues=None):
     query = f"""
     query GetProjectIssues($owner: String!, $projectNumber: Int!, $status: String!, $after: String) {{
         {owner_type}(login: $owner) {{
@@ -187,26 +177,21 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
        
                 # Get the current issue status
                 current_status = node.get('fieldValueByName', {}).get('name')
-                previous_status = previous_statuses.get(issue_id, "Unknown")
        
                 # Apply the 'open_only' filter if specified
                 if filters.get('open_only') and issue_content.get('state') != 'OPEN':
                     logging.debug(f"Filtering out issue ID {issue_id} with state {issue_content.get('state')}")
                     continue
        
-                # Check if status has changed to "QA Testing"
-                if previous_status != 'QA Testing' and current_status == 'QA Testing':
-                    logging.debug(f"Adding issue ID {issue_id} as status changed to 'QA Testing'")
-                    filtered_issues.append(node)
-       
-                # Update the previous status
-                previous_statuses[issue_id] = current_status
+                # Check if status is "QA Testing"
+                if current_status == 'QA Testing':
+                    # Check if a comment already exists on the issue
+                    if not utils.check_comment_exists(issue_id, "This issue is now in QA Testing."):
+                        logging.debug(f"Adding issue ID {issue_id} as status is 'QA Testing'")
+                        filtered_issues.append(node)
        
             # Update nodes with the filtered list
             nodes = filtered_issues
-    
-        # Store or use previous_statuses as needed (e.g., save it for the next run)
-        logging.debug(f"Final previous_statuses: {previous_statuses}")
     
         # Append filtered nodes to issues
         issues = issues + nodes
@@ -219,15 +204,13 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
                 after=pageinfo.get('endCursor'),
                 filters=filters,
                 issues=issues,
-                status_field_name=status_field_name,
-                previous_statuses=previous_statuses
+                status_field_name=status_field_name
             )
     
         return issues
     except requests.RequestException as e:
         logging.error(f"Request error: {e}")
         return []
-
 
 def add_issue_comment(issueId, comment):
     mutation = """
