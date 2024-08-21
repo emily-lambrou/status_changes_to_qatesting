@@ -174,9 +174,10 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
                 issue_id = issue_content.get('id')
                 if not issue_id:
                     continue
-       
-                # Get the current issue status
-                current_status = node.get('fieldValueByName', {}).get('name')
+
+                # Safely get the fieldValueByName and current status
+                field_value = node.get('fieldValueByName')
+                current_status = field_value.get('name') if field_value else None
        
                 # Apply the 'open_only' filter if specified
                 if filters.get('open_only') and issue_content.get('state') != 'OPEN':
@@ -188,8 +189,13 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
                     # Check if a comment already exists on the issue
                     if not utils.check_comment_exists(issue_id, "This issue is now in QA Testing. Please proceed with the necessary testing."):
                         logging.debug(f"Adding issue ID {issue_id} as status is 'QA Testing'")
+                        # Add comment
+                        add_issue_comment(issue_id, "This issue is now in QA Testing. Please proceed with the necessary testing.")
+                        logging.info(f"Comment added to issue {issue_id}")
                         filtered_issues.append(node)
-       
+                    else:
+                        logging.info(f"Comment already exists for issue {issue_id}")
+
             # Update nodes with the filtered list
             nodes = filtered_issues
     
@@ -211,6 +217,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
     except requests.RequestException as e:
         logging.error(f"Request error: {e}")
         return []
+
 
 def add_issue_comment(issueId, comment):
     mutation = """
