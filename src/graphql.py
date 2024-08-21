@@ -242,3 +242,58 @@ def add_issue_comment(issueId, comment):
     except requests.RequestException as e:
         logging.error(f"Request error: {e}")
         return {}
+
+def get_issue_comments(issue_id):
+    query = """
+    query GetIssueComments($issueId: ID!) {
+        node(id: $issueId) {
+            ... on Issue {
+                comments(first: 100) {
+                    nodes {
+                        body
+                        createdAt
+                        author {
+                            login
+                        }
+                    }
+                    pageInfo {
+                        endCursor
+                        hasNextPage
+                    }
+                }
+            }
+        }
+    }
+    """
+
+    variables = {
+        'issueId': issue_id
+    }
+
+    try:
+        response = requests.post(
+            config.api_endpoint,
+            json={"query": query, "variables": variables},
+            headers={"Authorization": f"Bearer {config.gh_token}"}
+        )
+        
+        data = response.json()
+
+        if 'errors' in data:
+            logging.error(f"GraphQL query errors: {data['errors']}")
+            return []
+
+        comments_data = data.get('data', {}).get('node', {}).get('comments', {})
+        comments = comments_data.get('nodes', [])
+
+        # Handle pagination if there are more comments
+        pageinfo = comments_data.get('pageInfo', {})
+        if pageinfo.get('hasNextPage'):
+            next_page_comments = get_issue_comments(issue_id, after=pageinfo.get('endCursor'))
+            comments.extend(next_page_comments)
+
+        return comments
+
+    except requests.RequestException as e:
+        logging.error(f"Request error: {e}")
+        return []
