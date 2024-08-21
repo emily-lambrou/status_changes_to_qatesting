@@ -1,5 +1,5 @@
 name: "QA Testing Status Notification"
-description: "Notify when an issue's status changes to QA Testing by commenting on the issue and sending an email to the assignees."
+description: "Notify when an issue's status changes to QA Testing by commenting on the issue and automatically send an email to a specific assignee."
 author: "Emily Lambrou"
 branding:
   icon: 'notification'
