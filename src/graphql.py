@@ -307,16 +307,22 @@ def get_issue_comments(issue_id):
 
 def add_issue_label(issueId, label):
     mutation = """
-    mutation AddIssueLabel($issueId: ID!, $label: String!) {
-        addLabelsToLabelable(input: {labelableId: $issueId, labels: [$label]}) {
-            clientMutationId
+    mutation AddIssueLabel($issueId: ID!, $labels: [String!]!) {
+        addLabelsToLabelable(input: {labelableId: $issueId, labels: $labels}) {
+            labelable {
+                labels(first: 10) {
+                    nodes {
+                        name
+                    }
+                }
+            }
         }
     }
     """
 
     variables = {
         'issueId': issueId,
-        'label': label
+        'labels': [label]  # Note: 'labels' should be a list of strings
     }
 
     try:
@@ -329,11 +335,14 @@ def add_issue_label(issueId, label):
 
         if 'errors' in data:
             logging.error(f"GraphQL mutation errors: {data['errors']}")
-
+            return None  # Return None to indicate failure
+        
+        # Print the result for debugging
+        logging.debug(f"Mutation result: {data}")
+        
         return data.get('data')
 
     except requests.RequestException as e:
         logging.error(f"Request error: {e}")
-        return {}
-
+        return None
 
