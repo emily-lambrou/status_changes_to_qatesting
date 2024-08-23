@@ -13,8 +13,9 @@ text field (status) that you can add to your GitHub project board.
 
 In this workflow you can use comments to send notifications. You can tag a specific assignee in order to recieve
 an email regarding the change of the status to "QA Testing" in order to proceed with the testing. Therefore a comment 
-will be added to the issue, tagging a specific assignee. This action will trigger an email notification to that assignee. 
-For this workflow, the comment will be directed to the assignee with the username "@tantoniou." However, you can modify this to tag any assignee you choose.
+will be added to the issue, tagging a specific assignee. This action will trigger an email notification to that assignee
+and also a label "QA Testing (Status)" will be added in the issue.
+
 
 ### Prerequisites
 
