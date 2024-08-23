@@ -82,9 +82,11 @@ def notify_change_status():
 
                     if not config.dry_run:
                         graphql.add_issue_comment(issue_id, comment)
+                        # Add the label after commenting
+                        graphql.add_issue_label(issue_id, "QA Testing (Status)")
                     
                     logger.info(f'Comment added to issue #{issue_content.get("number")} ({issue_id})')
-         
+                    logger.info(f'Label "QA Testing (Status)" added to issue #{issue_content.get("number")} ({issue_id})')
 
 def main():
     logger.info('Process started...')
