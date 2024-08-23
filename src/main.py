@@ -81,12 +81,20 @@ def notify_change_status():
                     )
 
                     if not config.dry_run:
-                        graphql.add_issue_comment(issue_id, comment)
-                        # Add the label after commenting
-                        graphql.add_issue_label(issue_id, "QA Testing (Status)")
-                    
-                    logger.info(f'Comment added to issue #{issue_content.get("number")} ({issue_id})')
-                    logger.info(f'Label "QA Testing (Status)" added to issue #{issue_content.get("number")} ({issue_id})')
+                        comment_result = graphql.add_issue_comment(issue_id, comment)
+                        if comment_result:
+                            logger.info(f'Comment added to issue #{issue_content.get("number")} ({issue_id})')
+                        else:
+                            logger.error(f'Failed to add comment to issue #{issue_content.get("number")} ({issue_id})')
+
+                        label_result = graphql.add_issue_label(issue_id, "QA Testing (Status)")
+                        if label_result:
+                            logger.info(f'Label "QA Testing (Status)" added to issue #{issue_content.get("number")} ({issue_id})')
+                        else:
+                            logger.error(f'Failed to add label "QA Testing (Status)" to issue #{issue_content.get("number")} ({issue_id})')
+            else:
+                logger.info(f'Comment already exists for issue #{issue_content.get("number")} ({issue_id})')
+
 
 def main():
     logger.info('Process started...')
