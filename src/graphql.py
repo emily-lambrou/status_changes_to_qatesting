@@ -5,6 +5,12 @@ import utils
 
 logging.basicConfig(level=logging.DEBUG)  # Ensure logging is set up
 
+import logging
+import requests
+import config
+
+logging.basicConfig(level=logging.DEBUG)
+
 def get_repo_labels(owner, repository):
     query = """
     query($owner: String!, $repo: String!) {
@@ -37,6 +43,7 @@ def get_repo_labels(owner, repository):
             return []
 
         labels = data.get('data', {}).get('repository', {}).get('labels', {}).get('nodes', [])
+        logging.debug(f"Retrieved labels: {labels}")
         return labels
 
     except requests.RequestException as e:
@@ -47,9 +54,55 @@ def get_label_id(owner, repository, label_name):
     labels = get_repo_labels(owner, repository)
     for label in labels:
         if label['name'] == label_name:
+            logging.debug(f"Found label '{label_name}' with ID: {label['id']}")
             return label['id']
     logging.warning(f"Label '{label_name}' not found.")
     return None
+
+def add_issue_label(issue_id, label_ids):
+    mutation = """
+    mutation AddIssueLabel($issueId: ID!, $labelIds: [ID!]!) {
+        addLabelsToLabelable(input: {labelableId: $issueId, labelIds: $labelIds}) {
+            labelable {
+                ... on Issue {
+                    id
+                    labels(first: 10) {
+                        edges {
+                            node {
+                                name
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    """
+
+    variables = {
+        'issueId': issue_id,
+        'labelIds': label_ids
+    }
+
+    try:
+        response = requests.post(
+            config.api_endpoint,
+            json={"query": mutation, "variables": variables},
+            headers={"Authorization": f"Bearer {config.gh_token}"}
+        )
+        data = response.json()
+
+        if 'errors' in data:
+            logging.error(f"GraphQL mutation errors: {data['errors']}")
+            return None
+
+        logging.debug(f"Mutation result: {data}")
+        return data.get('data')
+
+    except requests.RequestException as e:
+        logging.error(f"Request error: {e}")
+        return None
+
 
 def get_repo_issues(owner, repository, status_field_name, after=None, issues=None):
     query = """
@@ -284,49 +337,6 @@ def add_issue_comment(issue_id, comment):
         logging.error(f"Request error: {e}")
         return {}
 
-def add_issue_label(issue_id, label_ids):
-    mutation = """
-    mutation AddIssueLabel($issueId: ID!, $labelIds: [ID!]!) {
-        addLabelsToLabelable(input: {labelableId: $issueId, labelIds: $labelIds}) {
-            labelable {
-                ... on Issue {
-                    id
-                    labels(first: 10) {
-                        edges {
-                            node {
-                                name
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    """
-
-    variables = {
-        'issueId': issue_id,
-        'labelIds': label_ids
-    }
-
-    try:
-        response = requests.post(
-            config.api_endpoint,
-            json={"query": mutation, "variables": variables},
-            headers={"Authorization": f"Bearer {config.gh_token}"}
-        )
-        data = response.json()
-
-        if 'errors' in data:
-            logging.error(f"GraphQL mutation errors: {data['errors']}")
-            return None
-
-        logging.debug(f"Mutation result: {data}")
-        return data.get('data')
-
-    except requests.RequestException as e:
-        logging.error(f"Request error: {e}")
-        return None
 
 def get_issue_comments(issue_id):
     query = """
