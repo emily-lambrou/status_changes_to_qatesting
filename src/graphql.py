@@ -304,3 +304,36 @@ def get_issue_comments(issue_id):
     except requests.RequestException as e:
         logging.error(f"Request error: {e}")
         return []
+
+def add_issue_label(issueId, label):
+    mutation = """
+    mutation AddIssueLabel($issueId: ID!, $label: String!) {
+        addLabelsToLabelable(input: {labelableId: $issueId, labels: [$label]}) {
+            clientMutationId
+        }
+    }
+    """
+
+    variables = {
+        'issueId': issueId,
+        'label': label
+    }
+
+    try:
+        response = requests.post(
+            config.api_endpoint,
+            json={"query": mutation, "variables": variables},
+            headers={"Authorization": f"Bearer {config.gh_token}"}
+        )
+        data = response.json()
+
+        if 'errors' in data:
+            logging.error(f"GraphQL mutation errors: {data['errors']}")
+
+        return data.get('data')
+
+    except requests.RequestException as e:
+        logging.error(f"Request error: {e}")
+        return {}
+
+
