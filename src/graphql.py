@@ -1,6 +1,7 @@
 import requests
 import config
 import logging
+import utils
 
 logging.basicConfig(level=logging.DEBUG)  # Ensure logging is set up
 
