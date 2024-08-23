@@ -77,21 +77,21 @@ def notify_change_status():
                             label_id = graphql.get_label_id(
                                 owner=config.repository_owner,
                                 repository=config.repository_name,
-                                label_name="QA Testing"
+                                label_name="QA Testing (Status)"
                             )
                             if label_id:
                                 # Store label_id in config if necessary
                                 config.qa_testing_label_id = label_id
                             else:
-                                logger.error('Label ID for "QA Testing" could not be found.')
+                                logger.error('Label ID for "QA Testing (Status)" could not be found.')
                                 continue
 
                         if not config.dry_run:
                             label_result = graphql.add_issue_label(issue_id, [label_id])
                             if label_result:
-                                logger.info(f'Label "QA Testing" added to issue #{issue_content.get("number")} ({issue_id})')
+                                logger.info(f'Label "QA Testing (Status)" added to issue #{issue_content.get("number")} ({issue_id})')
                             else:
-                                logger.error(f'Failed to add label "QA Testing" to issue #{issue_content.get("number")} ({issue_id})')
+                                logger.error(f'Failed to add label "QA Testing (Status)" to issue #{issue_content.get("number")} ({issue_id})')
             else:
                 logger.info(f'Comment already exists for issue #{issue_content.get("number")} ({issue_id})')
 
