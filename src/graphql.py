@@ -1,7 +1,6 @@
-import logging
 import requests
 import config
-import utils
+import logging
 
 logging.basicConfig(level=logging.DEBUG)  # Ensure logging is set up
 
@@ -110,7 +109,7 @@ def get_repo_issues(owner, repository, status_field_name, after=None, issues=Non
     data = response.json()
 
     if data.get('errors'):
-        print(data.get('errors'))
+        logging.error(f"GraphQL query errors: {data.get('errors')}")
     
     repository_data = data.get('data', {}).get('repository', {})
     issues_data = repository_data.get('issues', {})
