@@ -16,13 +16,3 @@ notification_type = os.environ['INPUT_NOTIFICATION_TYPE']
 
 if notification_type not in ['comment', 'email']:
     raise Exception(f'Unsupported notification type {notification_type}')
-
-
-# Initialize the label ID for "QA Testing" as None
-qa_testing_label_id = None
-
-#  Update qa_testing_label_id value
-def set_qa_testing_label_id(label_id):
-    global qa_testing_label_id
-    qa_testing_label_id = label_id
-
