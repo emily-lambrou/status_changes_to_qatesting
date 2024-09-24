@@ -69,11 +69,10 @@ def notify_change_status():
 
         # Check if the current status is "QA Testing"
         if current_status == 'QA Testing':
-            # Prepare the comment text
-            comment_text = "This issue is ready for testing. Please proceed accordingly."
-            
+
             # Check if the comment already exists
-            if not utils.check_comment_exists(issue_id, comment_text):
+
+            if not check_specific_bot_comment_exists(issue_id):
                 if config.notification_type == 'comment':
                     comment = utils.prepare_issue_comment(
                         issue=issue_content,
