@@ -72,7 +72,7 @@ def notify_change_status():
 
             # Check if the comment already exists
 
-            if not check_specific_bot_comment_exists(issue_id):
+            if not utils.check_specific_bot_comment_exists(issue_id):
                 if config.notification_type == 'comment':
                     comment = utils.prepare_issue_comment(
                         issue=issue_content,
