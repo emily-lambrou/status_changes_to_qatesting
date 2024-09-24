@@ -342,7 +342,7 @@ def get_issue_comments(issue_id):
     query GetIssueComments($issueId: ID!, $afterCursor: String) {
         node(id: $issueId) {
             ... on Issue {
-                comments(first: 250, after: $afterCursor) {
+                comments(first: 100, after: $afterCursor) {
                     nodes {
                         body
                         createdAt
