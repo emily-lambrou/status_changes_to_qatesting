@@ -259,8 +259,11 @@ def get_issue_comments(issue_id):
                     nodes {
                         body
                         createdAt
+                        minimizedReason # checking if the comment is hidden or minimized in any way
+                        viewerCanMinimize
                         author {
                             login
+                            isBot # checking if the comment is from a bot
                         }
                     }
                     pageInfo {
