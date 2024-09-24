@@ -187,7 +187,7 @@ def get_project_issues(owner, owner_type, project_number, status_field_name, fil
                 # Check if status is "QA Testing"
                 if current_status == 'QA Testing':
                     # Check if a comment already exists on the issue
-                    if not utils.check_comment_exists(issue_id, "This issue is ready for testing. Please proceed accordingly."):
+                    if not check_specific_bot_comment_exists (issue_id):
                         logging.debug(f"Adding issue ID {issue_id} as status is 'QA Testing'")
                         # Add comment
                         add_issue_comment(issue_id, "This issue is ready for testing. Please proceed accordingly.")
@@ -249,67 +249,3 @@ def add_issue_comment(issueId, comment):
     except requests.RequestException as e:
         logging.error(f"Request error: {e}")
         return {}
-
-def get_issue_comments(issue_id):
-    query = """
-    query GetIssueComments($issueId: ID!, $afterCursor: String) {
-        node(id: $issueId) {
-            ... on Issue {
-                comments(first: 100, after: $afterCursor) {
-                    nodes {
-                        body
-                        createdAt
-                        minimizedReason # checking if the comment is hidden or minimized in any way
-                        viewerCanMinimize
-                        author {
-                            login
-                            isBot # checking if the comment is from a bot
-                        }
-                    }
-                    pageInfo {
-                        endCursor
-                        hasNextPage
-                    }
-                }
-            }
-        }
-    }
-    """
-
-    variables = {
-        'issueId': issue_id,
-        'afterCursor': None
-    }
-
-    all_comments = []
-
-    try:
-        while True:
-            response = requests.post(
-                config.api_endpoint,
-                json={"query": query, "variables": variables},
-                headers={"Authorization": f"Bearer {config.gh_token}"}
-            )
-
-            data = response.json()
-
-            if 'errors' in data:
-                logging.error(f"GraphQL query errors: {data['errors']}")
-                break
-
-            comments_data = data.get('data', {}).get('node', {}).get('comments', {})
-            comments = comments_data.get('nodes', [])
-            all_comments.extend(comments)
-
-            pageinfo = comments_data.get('pageInfo', {})
-            if not pageinfo.get('hasNextPage'):
-                break
-
-            # Set the cursor for the next page
-            variables['afterCursor'] = pageinfo.get('endCursor')
-
-        return all_comments
-
-    except requests.RequestException as e:
-        logging.error(f"Request error: {e}")
-        return []
