@@ -252,10 +252,10 @@ def add_issue_comment(issueId, comment):
 
 def get_issue_comments(issue_id):
     query = """
-    query GetIssueComments($issueId: ID!) {
+    query GetIssueComments($issueId: ID!, $afterCursor: String) {
         node(id: $issueId) {
             ... on Issue {
-                comments(first: 100) {
+                comments(first: 100, after: $afterCursor) {
                     nodes {
                         body
                         createdAt
@@ -274,32 +274,38 @@ def get_issue_comments(issue_id):
     """
 
     variables = {
-        'issueId': issue_id
+        'issueId': issue_id,
+        'afterCursor': None
     }
 
+    all_comments = []
+
     try:
-        response = requests.post(
-            config.api_endpoint,
-            json={"query": query, "variables": variables},
-            headers={"Authorization": f"Bearer {config.gh_token}"}
-        )
-        
-        data = response.json()
+        while True:
+            response = requests.post(
+                config.api_endpoint,
+                json={"query": query, "variables": variables},
+                headers={"Authorization": f"Bearer {config.gh_token}"}
+            )
 
-        if 'errors' in data:
-            logging.error(f"GraphQL query errors: {data['errors']}")
-            return []
+            data = response.json()
 
-        comments_data = data.get('data', {}).get('node', {}).get('comments', {})
-        comments = comments_data.get('nodes', [])
+            if 'errors' in data:
+                logging.error(f"GraphQL query errors: {data['errors']}")
+                break
 
-        # Handle pagination if there are more comments
-        pageinfo = comments_data.get('pageInfo', {})
-        if pageinfo.get('hasNextPage'):
-            next_page_comments = get_issue_comments(issue_id, after=pageinfo.get('endCursor'))
-            comments.extend(next_page_comments)
+            comments_data = data.get('data', {}).get('node', {}).get('comments', {})
+            comments = comments_data.get('nodes', [])
+            all_comments.extend(comments)
 
-        return comments
+            pageinfo = comments_data.get('pageInfo', {})
+            if not pageinfo.get('hasNextPage'):
+                break
+
+            # Set the cursor for the next page
+            variables['afterCursor'] = pageinfo.get('endCursor')
+
+        return all_comments
 
     except requests.RequestException as e:
         logging.error(f"Request error: {e}")
