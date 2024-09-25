@@ -56,7 +56,7 @@ def notify_change_status():
             continue
 
         if current_status == 'QA Testing':
-            comment_text = "This issue is ready for testing. Please proceed accordingly."
+            comment_text = "This issue is ready for testing. Please proceed accordingly in 15 minutes."
 
             if not utils.check_comment_exists(issue_id, comment_text):
                 if config.notification_type == 'comment':
