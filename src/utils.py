@@ -14,7 +14,7 @@ def prepare_issue_comment(issue: dict, assignees: dict):
     else:
         logger.info(f'No assignees found for issue #{issue["number"]}')
 
-    comment += f'This issue is ready for testing. Please proceed accordingly.'
+    comment += f'This issue is ready for testing. Please proceed accordingly in 15 minutes.'
     logger.info(f'Issue {issue["title"]} | {comment}')
 
     return comment
