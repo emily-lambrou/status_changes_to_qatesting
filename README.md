@@ -11,8 +11,8 @@ you can modify it.
 This GitHub Action allows you to manage status changes for issues in a central GitHub project. It integrates with a custom
 text field (status) that you can add to your GitHub project board. 
 
-In this workflow you can use comments to send notifications. You can tag a specific assignee in order to recieve
-an email regarding the change of the status to "QA Testing" in order to proceed with the testing. Therefore a comment 
+In this workflow you can use comments to send notifications. You can tag a specific assignee in order to receive
+an email regarding the change of the status to "QA Testing" to proceed with the testing. Therefore a comment 
 will be added to the issue, tagging a specific assignee. This action will trigger an email notification to that assignee.
 
 
